@@ -39,13 +39,13 @@ Integer age = getAsInt("age").orElseThrow(()->new IllegalStateException("age not
 Men vi kan gjøre det bedre! Ville det ikke være bedre å kombinere options normale bruk, men med feilrapportering - dog uten å måtte kaste exceptions hele tiden? Kunne man kanskje også samle alle feilene i en bolk dersom man skulle ønske dette? Og kunne man i tillegg unngå alle innrykkene som flatMap krever?
 Svaret er selvfølgelig ja. La oss lage en klasse for dette. Vi kaller den Validated.
 Først må vi definere betydningen av den nye typen vår: 
-__`Validated<A>` representer et objekt som __enten__ inneholder et objekt av typent `A` __eller__ inneholder en liste av feilmeldinger._
+_`Validated<A>` representer et objekt som __enten__ inneholder et objekt av typen `A` __eller__ inneholder en liste av feilmeldinger._
 
 I Java er det greit å representere disse to tilstandene som subklasser. La oss kalle dem Valid og Failed.
 Akkurat som at man ikke vet hvor mange elementer en liste inneholder (utifra typen), eller at man ikke vet om en Optional er defined eller ikke, ved vi heller ikke om 
 Validated inneholder feilmeldinger, eller objektet vi er ute etter. (uten å sjekke den runtime)
 
-Men hvordan finner vi ut det? La oss se på hvordan man bruker en Optional for inspirasjon. 
+Men hvordan bruker vi det da? La oss se på hvordan man bruker en Optional for inspirasjon. 
 Dersom man skal manipulere et objekt i en optional, uten å måtte sjekke om den er defined først, bruker vi map(). Map tar inn en funksjon som endrer innholdet. Denne funksjonen anvendes bare dersom det er noe å anvende den på. Så dersom vi kaller map på en Optional som er empty, skjer det ingenting. Man trenger å gjøre en test først. Så map er noe vi kan ha på Validated også.
 Men validated "inneholder" data i både Valid og Failed tilstandene, så vi må bestemme oss for hvilken tilstand map skal gjelde for. Siden det vanligvis ikke er så spennende å endre feilmeldinger bestemmer vi oss for at map skal gjelde Success, og bli ignorert ved Failed.
 
