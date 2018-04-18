@@ -44,6 +44,6 @@ public class Settings {
         return
           type.isInstance(o)
             ? valid(type.cast(o))
-            : fail("Trying to cast an objecgt of type " + o.getClass().getName() + " into an object of type " + type.getName());
+            : fail("Trying to cast an object of type " + o.getClass().getName() + " to type " + type.getName());
     }
 }
