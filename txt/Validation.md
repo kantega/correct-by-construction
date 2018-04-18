@@ -45,20 +45,6 @@ I Java er det greit å representere disse to tilstandene som subklasser. La oss 
 Akkurat som at man ikke vet hvor mange elementer en liste inneholder (utifra typen), eller at man ikke vet om en Optional er defined eller ikke, ved vi heller ikke om 
 Validated inneholder feilmeldinger, eller objektet vi er ute etter. (uten å sjekke den runtime)
 
-Men hvordan bruker vi det da? La oss se på hvordan man bruker en Optional for inspirasjon. 
-Dersom man skal manipulere et objekt i en optional, uten å måtte sjekke om den er defined først, bruker vi map(). Map tar inn en funksjon som endrer innholdet. Denne funksjonen anvendes bare dersom det er noe å anvende den på. Så dersom vi kaller map på en Optional som er empty, skjer det ingenting. Man trenger å gjøre en test først. Så map er noe vi kan ha på Validated også.
-Men validated "inneholder" data i både Valid og Failed tilstandene, så vi må bestemme oss for hvilken tilstand map skal gjelde for. Siden det vanligvis ikke er så spennende å endre feilmeldinger bestemmer vi oss for at map skal gjelde Success, og bli ignorert ved Failed.
-
-la oss skrive javadoc og signatur for map
-```
-/**
-* If the Validated is Valid, then this method return a new Validated with the function applied to its contents. If the Validated is
-Failed, then it has no effect.
-*/
-<B> Validated<B> map(Function<A,B> function);
-
-```
-
 Ok, hvordan skal vi så lage en Validated? Vi trenger i hvertfall to statiske factory metoder, la oss kalle dem det åpenbare `Validated<T> success(A a)` og `Validated<T> fail(String msg)`.  Videre kan det være greit å kunne konvertere en Optional til en Validated: `Validated<T> of(Optional<T> o, String onEmpty)`.
 
 Nå kan vi endre koden vår litt:
@@ -96,8 +82,20 @@ Validated<Integer> getAsInt(String name);
 Validated<Param> params = loadParams();
 ```
 
-Hvordan skal vi nå få ut username og age?
-Vi kan prøve med map
+Hvordan skal vi nå få ut username og age?  La oss se på hvordan man bruker en Optional for inspirasjon. 
+Dersom man skal manipulere et objekt i en optional, uten å måtte sjekke om den er defined først, bruker vi map(). Map tar inn en funksjon som endrer innholdet. Denne funksjonen anvendes bare dersom det er noe å anvende den på. Så dersom vi kaller map på en Optional som er empty, skjer det ingenting. Man trenger å gjøre en test først. Så map er noe vi kan ha på Validated også.
+Men validated "inneholder" data i både Valid og Failed tilstandene, så vi må bestemme oss for hvilken tilstand map skal gjelde for. Siden det vanligvis ikke er så spennende å endre feilmeldinger bestemmer vi oss for at map skal gjelde Success, og bli ignorert ved Failed.
+
+la oss skrive javadoc og signatur for map:
+```
+/**
+* If the Validated is Valid, then this method return a new Validated with the function applied to its contents. If the Validated is
+Failed, then it has no effect.
+*/
+<B> Validated<B> map(Function<A,B> function);
+
+```
+Så kan vi prøve på params:
 ```
 Validated<Param> params = loadParams();
 Validated<Validated<String>> username = params.map(p->p.getAsString("username"));

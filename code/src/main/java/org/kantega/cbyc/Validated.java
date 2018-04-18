@@ -2,6 +2,9 @@ package org.kantega.cbyc;
 
 import fj.*;
 import fj.data.NonEmptyList;
+import fj.data.Option;
+
+import java.util.Optional;
 
 /**
  * A Validated represents a value that has been validated. It can have one of two states. Either it is a Fail or it is a Valid.
@@ -70,6 +73,28 @@ public interface Validated<A> {
         return new Fail<>(NonEmptyList.nel(msg));
     }
 
+
+    /**
+     * Turns an optional into a Validated with the supplied message if the Optional is empty
+     * @param optional The optional to check
+     * @param msg the message if the optional is empty
+     * @param <A> the type of the validated object
+     * @return a new Validated
+     */
+    static <A> Validated<A> of(Optional<A> optional, String msg){
+        return optional.map(Validated::valid).orElseGet(()->fail(msg));
+    }
+
+    /**
+     * Turns an optional into a Validated with the supplied message if the Optional is empty
+     * @param optional The optional to check
+     * @param msg the message if the optional is empty
+     * @param <A> the type of the validated object
+     * @return a new Validated
+     */
+    static <A> Validated<A> of(Option<A> optional, String msg){
+        return optional.map(Validated::valid).orSome(()->fail(msg));
+    }
 
     /**
      * Accumulates the values of two Validated values. If both are Valid, the values are applied to the provided function, returning
@@ -150,6 +175,13 @@ public interface Validated<A> {
               f -> valid(f.f(value))
             );
         }
+
+        @Override
+        public String toString() {
+            return "Valid{" +
+              "value=" + value +
+              '}';
+        }
     }
 
     /**
@@ -185,6 +217,13 @@ public interface Validated<A> {
               otherMsgs -> new Fail<>(msgs.append(otherMsgs)),
               s -> new Fail<>(msgs)
             );
+        }
+
+        @Override
+        public String toString() {
+            return "Fail{" +
+              "msgs=" + msgs +
+              '}';
         }
     }
 
