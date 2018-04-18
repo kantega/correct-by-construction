@@ -72,19 +72,19 @@ Vi kunne f.eks. laget en statisk metode som tar inn to Validated, og så - derso
 
 ```
 If both the provided Validated objects are Valid, the contents are applied to the function, and the result is put in a new Valid.
-Else the messages are appended and returned in a new Failed.
-public static <A,B,C> Validated<C> bind(Validated<A> av, Validated<B> bv,FiFunction<A,B,C> combiner){...}
+Else the messages are accumulated and returned in a new Failed.
+public static <A,B,C> Validated<C> accum(Validated<A> av, Validated<B> bv,FiFunction<A,B,C> combiner){...}
 ```
-Vi utsetter implementasjonen av denne metoden, la oss se hvordan bruken ser ut først:
+Vi utsetter implementasjonen av denne metoden til senere, la oss først se hvordan man bruker den:
 ```
 Validated<String> username = Validated.of(getAsString("username"),"username not defined"));
 Validated<Integer> age = Validated.of(getAsString("age"),"age not defined));
 
-Validated<User> user = Validated.bind(username,age,User::new);
+Validated<User> user = Validated.accum(username,age,User::new);
 ```
 Ikke så verst.
 Ulempene åpenbarer seg når man vil binde flere sammen; For det første man må lage en statisk metode for hvert antall Validated man vil kunne binde sammen, for det andre har ikke java et standard grensesnitt for funksjoner som tar inn mer enn to argumenter.
-Det sistnevnte kan man løse ved å enten bruke grensesnitt fra bibliotek som støtter dette, feks. vavr.io eller functionaljava.com, eller så nøster man funksjoner: Function<A,Function<B,Function<C,D>>>. Det siste ser helt grusomt ut og støtter heller ikke metodereferenaser, så jeg anbefaler å bruke et bibliotek som støtter det. 
+Det sistnevnte kan man løse ved å enten bruke grensesnitt fra bibliotek som støtter dette, feks. vavr.io eller functionaljava.com, eller så nøster man funksjoner: Function<A,Function<B,Function<C,D>>>. Det siste ser helt grusomt ut og støtter heller ikke metodereferanser, så jeg anbefaler å bruke et bibliotek som støtter det. 
 
 Nå som vi har bestemt oss for hvordan vi løser hvordan vi binder sammen flere validateringer må vi finne ut hvordan vi løser problemet der en validering er avhengig av resultatet fra en annen validering. La oss utvide eksempelet over og anta at getAsString og getAsInt er definert på et Params objekt som lastes inn.
 
@@ -93,15 +93,18 @@ interface Param{
 Validated<String> getAsString(String name);
 Validated<Integer> getAsInt(String name);
 }
+Validated<Param> params = loadParams();
 ```
 
 Hvordan skal vi nå få ut username og age?
 Vi kan prøve med map
 ```
+Validated<Param> params = loadParams();
 Validated<Validated<String>> username = params.map(p->p.getAsString("username"));
 ```
 
-Hmmm. Typen ser riktig ut: Det er en validation av resulaltaten av en validation. Men det er upraktisk - den indre validation er er bare definert dersom den ytre er Valid, det betyr at maks en av dem er Failed. Da kan vi slå den sammen. La oss definere flatMap, som først mapper og så flater det ut etteropå:
+Hmmm. Typen ser riktig ut: Det er en validation av resulaltaten av en validation. Men det er upraktisk.
+Kanskje vi kan utnytte at den indre validation bare er bare definert dersom den ytre er Valid? Det betyr at maks en av dem er Failed og da kan vi slå den sammen. La oss definere flatMap, som først mapper og så slår de sammen etterpå:
 
 ```
 public <B> Validated<B> flatMap(Function<A,Validated<B>> function);
@@ -111,13 +114,39 @@ La oss sjekke koden;
 
 ```
 Validated<User> user = 
-    params.bind(p-> Validated.bind(p.getAsString("username"),p.getAsInt("age"),User::new));
-
+    params.flatMap(p -> Validated.accum(p.getAsString("username"), p.getAsInt("age"), User::new));
 ```
+Sweet!
+
 Uten noe særlig boilerplate kan vi nå
 1) kvitte oss med exceptions
 2) samle feilmeldinger
 3) nøste valideringer
-4) slå sammen valideringer dersom alle er gyldige, eller summere feilmeldingene for alle feil
+4) slå sammen valideringer dersom alle er gyldige, eller summere feilmeldingene for eventuelle feil
 
-Nå må vi bare implementere metodene, men det er lett.
+Nå må vi bare implementere metodekroppene, la oss begynne med den som kan virke mest urfordrende: accum().
+
+La oss se på spesifikasjonen: Dersom begge Validation er Valid skal verdiene inngå som argumenter til funksjonen som sendes inn. Dersom en av Validation er Fail skal denne returneres. Dersom begge er Fail skal filmeldingene legges sammen og legges i en ny Fail. Vi trenger altså en måte å hente ut innholdet i Validation på.
+
+
+
+
+En måte å gjøre dette på er gjennom en _fold_. Dette fungerer på samme måte som en visitor:
+```
+public <T> T fold(Function<List<String>,T> onFail,Function<A,T> onValid);
+```
+Vi lager en funksjon som tar inn to funksjoner. onFail blir brukt dersom Validation objektet er en Fail, og onValid dersom det er en Valid. Vi kan nå bruke denne i accum slik:
+```
+public static <A,B,C> Validated<C> accum(Validated<A> av, Validated<B> bv,FiFunction<A,B,C> combiner){
+    return av.fold(
+        aFailMsgs -> vb.fold(
+            bFailMsgs -> Validation.fail(aFailMsgs.append(bFailMsgs)), //a og b er Fail, legg sammen feilmeldiner og lag ny Fail
+            __ -> Validation.fail(aFailMsgs)), //a er Fail men b er Valid, returner a sin feilmelding bare
+        aValidValue -> vb.fold(
+            bFailMsgs -> Validation.fail(bFailMsgs), // a er valid med b er Fail, returner b sin feilmelding 
+            bValidValue -> Validation.valid(combiner.apply(aValidValue,bValidValue))) //begger er Valid. Apply funksjon og legg i en Valid
+    );
+}
+```
+
+Hmm, det var ganske knotete, __men__ vi kan være sikre på at dette stemmer, fordi det tross alt kompilerer. Men det blir uhåndterlig dersom man 
