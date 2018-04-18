@@ -5,7 +5,7 @@ import org.kantega.cbyc.Validated;
 public class ValidatedExample {
 
     public static void main(String[] args) {
-        var settings = Settings.empty().with("username", "Ola");
+        var settings = Settings.empty();
 
         var usernameV = settings.getAsString("username");
         var ageV = settings.getAsInt("age");
@@ -15,7 +15,7 @@ public class ValidatedExample {
         //Prints out a Fail
         System.out.println(userV);
 
-        var settings2 = settings.with("age",35);
+        var settings2 = settings.with("age",35).with("username", "Ola");
         var usernameV2 = settings2.getAsString("username");
         var ageV2 = settings2.getAsInt("age");
 
