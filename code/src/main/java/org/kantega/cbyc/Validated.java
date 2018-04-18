@@ -75,7 +75,7 @@ public interface Validated<A> {
 
 
     /**
-     * Turns an optional into a Validated with the supplied message if the Optional is empty
+     * Turns an Optional into a Validated with the supplied message if the Optional is empty
      * @param optional The optional to check
      * @param msg the message if the optional is empty
      * @param <A> the type of the validated object
@@ -86,7 +86,7 @@ public interface Validated<A> {
     }
 
     /**
-     * Turns an optional into a Validated with the supplied message if the Optional is empty
+     * Turns an fj.data.Option into a Validated with the supplied message if the Optional is empty
      * @param optional The optional to check
      * @param msg the message if the optional is empty
      * @param <A> the type of the validated object
