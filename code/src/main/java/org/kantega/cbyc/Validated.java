@@ -19,7 +19,7 @@ import java.util.Optional;
 public interface Validated<A> {
 
     /**
-     * Lets the user introspect the state og the validated object.
+     * Lets the user introspect the state of the validated object.
      * @param onFail The function that is called if this is a Fail
      * @param onSuccess The function that is called if this i a Valid
      * @param <T> The returned type
