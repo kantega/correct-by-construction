@@ -1,13 +1,21 @@
-# Validering av data - når Optional ikke strekker til.
+# Validering av data, sånn helt generelt
 
 Correct by construction er en artikkelserie for javautviklere som tar opp tips og triks for å kunne sove bedre om natten etter at man har releaset software. Dette er første artikkelen i serien.
 
 (Kode for denne artikkelen finner du [her](https://github.com/kantega/correct-by-construction/blob/master/code/src/main/java/org/kantega/cbyc/Validated.java) )
 
-Java 8 førte med seg `Optional` som første med seg en del kontroverser. Nå, en del år senere, har støvet lagt seg, og man har stort sett vendt seg til å unngå null for å håndere spesialtilfellet [0,1] i kardinalitet. Oså for validering viser Optional seg å være nyttig i enkelte tilfeller, fordi man kan bruker flatMap og map for å håndtere tilfellene der man enten ikke har dataene, eller de er ugyldige:
+
+"Validering" 
+
+Ordet vekker minner hos enhver systemutvikler. Vi kommer alle innom denne oppgaven fra tid til annen. Ofte forbinder man validering med å sjekke at data som kommer inn et grensesnitt er i korrekt format, f.eks. at et telefonnr består bare av siffer eller "+" eller at et navn er kun bokstaver. Noen ganger tenker man på validering når man sjekker at konfigurasjon er satt opp riktig. Andre ganger igjen brukes det for å fange opp feil der det blir upraktisk at typesystemet verner oss mot det, slik som deling på 0, eller at en verdi er `null`. 
+
+Hvis man skal se litt stort på det, kan man egentlig si at validering er både en _sjekk_ på at en verdi tilfredsstiller en bestemt regel, og *håndtering* av situasjonen dersom den ikke gjør det.
+
+Vi har hatt ulike verktøy som hjelper oss med dette i Java, slik som det innebygde `assert`, eller Bean Validation. Med Java 8 kom også Optional, som flere bruker for å markere en verdi som manglende eller ugyldig. Alle disse tilnærmingene har fordeler, men også ulemper.   I denne artikkelen skal vi se om vi kan finne en måte å utnytte fordelene med Optional, men uten ulempene.
+
+Optional hjelper oss å sørge for at vi ikke gjør operasjoner som kaster `RuntimeException`s - f.eks. en nullpointer - ved hjelp av map og flatMap:
 ```
     public Optional<String> getAsString(String paramName){...}
-
     public Optional<String> getAsInt(String paramName){...}
 
     Optional<User> userO =
@@ -18,8 +26,6 @@ Java 8 førte med seg `Optional` som første med seg en del kontroverser. Nå, e
 ```
 Litt vel mye paranteser og innrykk, men vi er sånn rimelig sikre på at userO er korrekt.
 Men når man ønsker å rapportere _hvorfor_ det ikke lar seg opprette et objekt er det vanlig å se litt keitete logikk rundt Optional. Dette løses ofte med en orgie av exceptions
-
-
 ```
 String username = getAsString("username").orElseThrow(()->new IllegalStateException("username not defined"));
 Integer age = getAsInt("age").orElseThrow(()->new IllegalStateException("age not defined);
@@ -140,3 +146,7 @@ Uten noe særlig boilerplate kan vi nå
 
 
 For å se selve implementasjonen er det greiest å bare se på koden til [implementasjonen](https://github.com/kantega/correct-by-construction/blob/master/code/src/main/java/org/kantega/cbyc/Validated.java)  og [eksempelet](https://github.com/kantega/correct-by-construction/blob/master/code/src/test/java/org/katenga/cbc/validated/ValidatedExample.java)
+
+Det kan jo også hende at man istedenfor å bare beholde en feilmelding har lyst til å lagre en liste med Exceptions istedenfor, da kan man beholde stacktracen også, som jo kan være veldig praktisk. Eller så ønsker man enda større frihet og vil bestemme fra gang til gang hva feil-tilstanden skal inneholde. Dette finnes heldigvis allerede implementert i en rekke biblioteker, f.eks. vavr.io eller functionaljava.com så jeg kan enbefale en titt der. Ellers så kan man ta koden fra eksempelet her og modde den etter egent behov.
+
+Håper det var lærerikt og følg med!  Det kommer mer!
