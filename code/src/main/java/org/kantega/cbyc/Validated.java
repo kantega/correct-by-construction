@@ -28,7 +28,8 @@ public interface Validated<A> {
     <T> T fold(F<NonEmptyList<String>, T> onFail, F<A, T> onSuccess);
 
     /**
-     * Transforms the contents of this Validated if it is Valid.
+     * If the Validated is Valid, then this method return a new Validated with the function applied to its contents. If the Validated is
+     * Failed, then it has no effect.
      * @param f The transformation function
      * @param <B> the type of the value that the function returns
      * @return a new Validated that contains the transformed value, or the original failure.
