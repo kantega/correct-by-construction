@@ -56,7 +56,7 @@ Validated<String> username = Validated.of(getAsString("username"),"username not 
 Validated<Integer> age = Validated.of(getAsInt("age"),"age not defined));
 ```
 Vi har kvittet oss med exceptions, men username og age er nå pakket inn i en Validated. Med Optional brukte vi flatMap for å pakke ut først den ene og så den andre, men det er knot så la oss se om vi får til å løse dette smooth.
-Vi kunne f.eks. laget en statisk metode som tar inn to Validated, og så - dersom begge er Valid - gjør innholdene tilgjengelige for oss samtidig.
+Vi kunne f.eks. laget en statisk metode som tar inn to Validated, og så - dersom begge er Valid - gjør innholdene tilgjengelige for oss samtidig. En slik metode kunne vært definert slik:
 
 ```
 /**
@@ -68,7 +68,7 @@ Vi kunne f.eks. laget en statisk metode som tar inn to Validated, og så - derso
 public static <A,B,C> Validated<C> accum(Validated<A> av, Validated<B> bv,BiFunction<A,B,C> combiner){...}
 ```
 
-Vi utsetter implementasjonen av denne metoden til senere, la oss først se hvordan man bruker den:
+Vi utsetter implementasjonen av denne metoden til senere, la oss først se hvordan man kunne ha brukt den:
 ```
 Validated<String> username = Validated.of(getAsString("username"),"username not defined"));
 Validated<Integer> age = Validated.of(getAsString("age"),"age not defined));
