@@ -12,7 +12,7 @@ public class ValidatedExample {
 
         var user = Validated.accum(username,age,User::new);
 
-        //Prints out a Fail
+        //Prints out a Fail with two messages
         System.out.println(user);
 
         var settings2 = settings.with("age",35).with("username", "Ola");
