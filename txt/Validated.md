@@ -13,19 +13,8 @@ Hvis man skal se litt stort på det, kan man egentlig si at validering er både 
 
 Vi har hatt ulike verktøy som hjelper oss med dette i Java, slik som det innebygde `assert`, eller Bean Validation. Med Java 8 kom også Optional, som flere bruker for å markere en verdi som manglende eller ugyldig. Alle disse tilnærmingene har fordeler, men også ulemper.   I denne artikkelen skal vi se om vi kan finne en måte å utnytte fordelene med Optional, men uten ulempene.
 
-Optional hjelper oss å sørge for at vi ikke gjør operasjoner som kaster `RuntimeException`s - f.eks. en nullpointer - ved hjelp av map og flatMap:
-```
-    public Optional<String> getAsString(String paramName){...}
-    public Optional<String> getAsInt(String paramName){...}
-
-    Optional<User> userO =
-        getAsString("username")
-            .flatMap(name-> 
-                getAsInt("age").map(age->
-                    new User(name,age)));
-```
-Litt vel mye paranteser og innrykk, men vi er sånn rimelig sikre på at userO er korrekt.
-Men når man ønsker å rapportere _hvorfor_ det ikke lar seg opprette et objekt er det vanlig å se litt keitete logikk rundt Optional. Dette løses ofte med en orgie av exceptions
+Optional hjelper oss å sørge for at vi ikke gjør operasjoner som kaster `RuntimeException`s - f.eks. en nullpointer - ved hjelp av map og flatMap,
+,men når man ønsker å rapportere _hvorfor_ det ikke lar seg opprette et objekt er det vanlig å se litt keitete logikk rundt Optional. Dette løses ofte med en orgie av exceptions
 ```
 String username = getAsString("username").orElseThrow(()->new IllegalStateException("username not defined"));
 Integer age = getAsInt("age").orElseThrow(()->new IllegalStateException("age not defined);
