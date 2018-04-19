@@ -5,6 +5,7 @@ import fj.data.NonEmptyList;
 import fj.data.Option;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * A Validated represents a value that has been validated. It can have one of two states. Either it is a Fail or it is a Valid.
@@ -97,6 +98,19 @@ public interface Validated<A> {
         return optional.map(Validated::valid).orSome(()->fail(msg));
     }
 
+    /**
+     * Validates an object by applying it to the supplied predicate.
+     * If the predicate holds, the object is valid.
+     * If the predicate fails, a Fail is returned with the supplied msg.
+     * @param value The object to validate
+     * @param predicate The predicate that must hold
+     * @param msg The message to use if the predicate does ot hold
+     * @param <A> the type of the object
+     * @return a Validated
+     */
+    static <A> Validated<A> validate(A value, Predicate<A> predicate,String msg){
+        return predicate.test(value) ?  valid(value) : fail(msg);
+    }
     /**
      * Accumulates the values of two Validated values. If both are Valid, the values are applied to the provided function, returning
      * a Valid with the result of the application.

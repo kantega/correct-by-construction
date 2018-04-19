@@ -135,17 +135,79 @@ La oss sjekke hvordan flatMap brukes.
 Validated<User> user = 
     params.flatMap(p -> Validated.accum(p.getAsString("username"), p.getAsInt("age"), User::new));
 ```
+
+Men vi kan dra den enda litt lenger! Hva om vi ønsker å sikre oss at alderen til brukeren alltid er mellom 0 og 150, slik at vi fanger opp åpenbare feil? Eller enda bedre: Hva om vi gjør dette til en regel som gjelder i hele systemet vårt?
+La oss lage en klasse Age som representerer alder.
+```
+public class Age {
+    public final int value;
+    
+    private Age(int value) {
+        this.value = value;
+    }
+}
+```
+Legg merke til at kosntruktoren er private! Vi vil nemlig ikke at man skal kunne opprette et Age objekt uten først å ha sjekket om tallet er korrekt.
+vi utvider Age litt ved å lage en factory metode som returnerer en `Validated<Age>`:
+```
+public class Age {
+    public final int value;
+    
+    private Age(int value) {
+        this.value = value;
+    }
+
+    /**
+    * The only way to create an Age is through this method, thereby assuring that it is valid.
+    * @param value
+    * @return
+    */
+    public static Validated<Age> toAge(int value) {
+        return Validated.validate(value, v -> (v >= 0 && v < 150), " The age must be in the range [0,150)").map(Age::new);
+    }
+}
+```
+Eneste måten å opprette et Age objekt nå er gjennom factory metoden, og den sjekker om verdien er gyldig og pakker age inn i en Validation.
+Vi kan nå sammenfatte alt i et eksempel:
+
+```
+public class ValidatedExample {
+
+    public static void main(String[] args) {
+        var settings = Settings.empty();
+
+        var username = settings.getAsString("username");
+        var age = settings.getAsInt("age").flatMap(Age::toAge);
+
+        var user = Validated.accum(username, age, User::new);
+
+        //Prints out a Fail with two messages
+        System.out.println(user);
+
+        var settings2 = settings.with("age", 35).with("username", "Ola");
+        var username2 = settings2.getAsString("username");
+        var age2 = settings2.getAsInt("age").flatMap(Age::toAge);
+
+        var user2 = Validated.accum(username2, age2, User::new);
+
+        //Prints out a Valid user
+        System.out.println(user2);
+        }
+}
+```
 Sweet!
+
 
 Uten noe særlig boilerplate kan vi nå
 1) kvitte oss med exceptions
 2) samle feilmeldinger
 3) nøste valideringer
 4) slå sammen valideringer dersom alle er gyldige, eller summere feilmeldingene for eventuelle feil
+5) være helt sikre på at objekter vi oppretter inneholder gyldige verdier.
 
+Og det beste er at vi kan bruke samme prinsipp overalt, og at vi kan bruke det på samme måte som Optional. Herlig :)
 
-
-For å se selve implementasjonen er det greiest å bare se på koden til [implementasjonen](https://github.com/kantega/correct-by-construction/blob/master/code/src/main/java/org/kantega/cbyc/Validated.java)  og [eksempelet](https://github.com/kantega/correct-by-construction/blob/master/code/src/test/java/org/katenga/cbc/validated/ValidatedExample.java)
+For å se selve implementasjonen av Validation er det greiest å bare se på koden til [implementasjonen](https://github.com/kantega/correct-by-construction/blob/master/code/src/main/java/org/kantega/cbyc/Validated.java)  og [eksempelet](https://github.com/kantega/correct-by-construction/blob/master/code/src/test/java/org/katenga/cbc/validated/ValidatedExample.java)
 
 Det kan jo også hende at man istedenfor å bare beholde en feilmelding har lyst til å lagre en liste med Exceptions istedenfor, da kan man beholde stacktracen også, som jo kan være veldig praktisk. Eller så ønsker man enda større frihet og vil bestemme fra gang til gang hva feil-tilstanden skal inneholde. Dette finnes heldigvis allerede implementert i en rekke biblioteker, f.eks. vavr.io eller functionaljava.com så jeg kan enbefale en titt der. Ellers så kan man ta koden fra eksempelet her og modde den etter egent behov.
 
