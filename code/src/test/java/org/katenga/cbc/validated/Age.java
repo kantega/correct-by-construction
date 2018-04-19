@@ -17,7 +17,7 @@ public class Age {
      * @return
      */
     public static Validated<Age> toAge(int value) {
-        return Validated.validate(value, v -> (v >= 0 && v < 150), " The age must be in the range [0,150)").map(Age::new);
+        return Validated.validate(value, v -> (v >= 0 && v < 150), "The age must be in the range [0,150)").map(Age::new);
     }
 
     @Override

@@ -5,7 +5,7 @@ import org.kantega.cbyc.Validated;
 public class ValidatedExample {
 
     public static void main(String[] args) {
-        var settings = Settings.empty();
+        var settings = Settings.empty().with("age", 235);
 
         var username = settings.getAsString("username");
         var age = settings.getAsInt("age").flatMap(Age::toAge);
