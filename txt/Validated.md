@@ -13,7 +13,7 @@ Java 8 førte med seg `Optional` som første med seg en del kontroverser. Nå, e
     Optional<User> userO =
         getAsString("username")
             .flatMap(name-> 
-                getAsInt("age").flatMap(age->
+                getAsInt("age").map(age->
                     new User(name,age)));
 ```
 Litt vel mye paranteser og innrykk, men vi er sånn rimelig sikre på at userO er korrekt.
