@@ -4,7 +4,6 @@ import org.kantega.cbyc.Validated;
 
 public class Age {
 
-
     public final int value;
 
     private Age(int value) {
@@ -12,7 +11,7 @@ public class Age {
     }
 
     /**
-     * The only way to create an Age is through this method, thereby assuring that it is valid.
+     * The only way to create an Age is through this method, thereby assuring that it is valid if it exists.
      * @param value
      * @return
      */
