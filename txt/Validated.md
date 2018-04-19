@@ -30,7 +30,7 @@ Eller så behandler man Optional som en litt brysom null:
     Optional<String> maybeUsername = getAsString("username");
 
     if(username.isDefined()){
-    String username = maybeUsername.get();
+        String username = maybeUsername.get();
     } else {
         throw new IllegalStateException("username not defined");
     }
