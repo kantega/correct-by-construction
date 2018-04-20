@@ -7,13 +7,13 @@ Correct by construction er en artikkelserie for javautviklere som tar opp tips o
 
 "Validering" 
 
-Ordet vekker minner hos enhver systemutvikler. Vi kommer alle innom denne oppgaven fra tid til annen. Ofte forbinder man validering med å sjekke at data som kommer inn et grensesnitt er i korrekt format, f.eks. at et telefonnr består bare av siffer eller "+" eller at et navn er kun bokstaver. Noen ganger tenker man på validering når man sjekker at konfigurasjon er satt opp riktig. Andre ganger igjen brukes det for å fange opp feil der det blir upraktisk at typesystemet verner oss mot det, slik som deling på 0, eller at en verdi er `null`. 
+Ordet vekker minner hos enhver systemutvikler, vi kommer alle innom denne oppgaven fra tid til annen. Ofte forbinder man validering med å sjekke at data som kommer inn et grensesnitt er i korrekt format, f.eks. at et telefonnr består bare av siffer eller "+" eller at et navn er kun bokstaver. Noen ganger tenker man på validering når man sjekker at konfigurasjon er satt opp riktig. Andre ganger igjen brukes det for å fange opp feil der det blir upraktisk at typesystemet verner oss mot det, slik som deling på 0, eller at en verdi er `null`. 
 
 Hvis man skal se litt stort på det, kan man egentlig si at validering er både en _sjekk_ på at en verdi tilfredsstiller en bestemt regel, og *håndtering* av situasjonen dersom den ikke gjør det.
 
-Vi har hatt ulike verktøy som hjelper oss med dette i Java, slik som det innebygde `assert`, eller Bean Validation. Med Java 8 kom også Optional, som flere bruker for å markere en verdi som manglende eller ugyldig. Alle disse tilnærmingene har fordeler, men også ulemper.   I denne artikkelen skal vi se om vi kan finne en måte å utnytte fordelene med Optional, men uten ulempene.
+Vi har hatt ulike verktøy som hjelper oss med dette i Java en stund nå, slik som det innebygde `assert`, eller Bean Validation. Med Java 8 kom også Optional, som flere bruker for å markere en verdi som manglende eller ugyldig. Alle disse tilnærmingene har fordeler, men også ulemper.   I denne artikkelen skal vi se om vi kan finne en måte å utnytte fordelene med Optional-tilnærmingen, men uten ulempene.
 
-Optional hjelper oss å sørge for at vi ikke gjør operasjoner som kaster `RuntimeException`s - f.eks. en nullpointer - ved hjelp av map og flatMap,
+Optional hjelper oss å sørge for at vi ikke gjør operasjoner som kaster `NullPointerException`s ved hjelp av map() og flatMap(),
 men når man ønsker å rapportere _hvorfor_ det ikke lar seg opprette et objekt er det vanlig å se litt keitete logikk rundt Optional. Dette løses ofte med en orgie av exceptions
 ```
 String username = getAsString("username").orElseThrow(()->new IllegalStateException("username not defined"));
@@ -76,7 +76,7 @@ Men man ser også et par åpenbar ulemper: Man trenger en ny statisk metode for 
 funksjoner som tar inn mer enn to argumenter i java.
 Det første løser man ganske greit (sjekk koden i medfølgende eksempler), det andre løser man ved å importere et api som støtter dette, feks [functionaljava](http://functionaljava.org) eller [vavr.io](http://vavr.io)
 
-Nå som vi har bestemt oss for hvordan vi løser hvordan vi slår sammen flere validateringer må vi finne ut hvordan vi løser problemet der en validering er avhengig av resultatet fra en annen validering. La oss utvide eksempelet over og anta at getAsString og getAsInt er definert på et Params objekt som lastes inn.
+Nå som vi har bestemt oss for hvordan vi løser hvordan vi slår sammen flere validateringer må vi finne ut hvordan vi løser problemet der en validering er avhengig av resultatet fra en annen validering. La oss utvide eksempelet over og ana at getAsString og getAsInt er definert på et Params objekt som lastes inn.
 
 ```
 interface Param{
