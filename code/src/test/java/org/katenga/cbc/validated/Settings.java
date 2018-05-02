@@ -36,7 +36,7 @@ public class Settings {
     public <A> Validated<A> getAs(String key, Class<A> type) {
         return
           Validated
-            .of(settings.get(key), "The settings does not contain any value with key " + key)
+            .of(settings.get(key), "The settings does not contain any value with key '" + key + "'")
             .flatMap(o -> cast(o, type));
     }
 

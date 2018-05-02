@@ -5,6 +5,7 @@ import fj.data.NonEmptyList;
 import fj.data.Option;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * A Validated represents a value that has been validated. It can have one of two states. Either it is a Fail or it is a Valid.
@@ -14,15 +15,17 @@ import java.util.Optional;
  * map() will transform the contents of the Validated iff it is Valid.
  * flatMap() lets you validate a value that depends on another Validated
  * apply() is like map(), but "inside" a Validated.
+ *
  * @param <A> the type of the value that is validated
  */
 public interface Validated<A> {
 
     /**
      * Lets the user introspect the state of the validated object.
-     * @param onFail The function that is called if this is a Fail
+     *
+     * @param onFail    The function that is called if this is a Fail
      * @param onSuccess The function that is called if this i a Valid
-     * @param <T> The returned type
+     * @param <T>       The returned type
      * @return The result of the corresponding function that has been applied
      */
     <T> T fold(F<NonEmptyList<String>, T> onFail, F<A, T> onSuccess);
@@ -30,7 +33,8 @@ public interface Validated<A> {
     /**
      * If the Validated is Valid, then this method return a new Validated with the function applied to its contents. If the Validated is
      * Failed, then it has no effect.
-     * @param f The transformation function
+     *
+     * @param f   The transformation function
      * @param <B> the type of the value that the function returns
      * @return a new Validated that contains the transformed value, or the original failure.
      */
@@ -39,7 +43,8 @@ public interface Validated<A> {
     /**
      * Applies the given function to the value if this is a Valid and returns the result. If this is a Fail, the failure message is
      * returned.
-     * @param f the function that applies a new validation
+     *
+     * @param f   the function that applies a new validation
      * @param <B> the type of the value the next validation validates
      * @return either a new validation based on this one, or this.
      */
@@ -48,7 +53,8 @@ public interface Validated<A> {
     /**
      * Applies the function of the supplied validation if both are Valid. Accumulates the failure messages if either or both are
      * a Fail.
-     * @param vf The Validated function to apply
+     *
+     * @param vf  The Validated function to apply
      * @param <B> the type of the return value of the function.
      * @return a new Validated.
      */
@@ -56,8 +62,9 @@ public interface Validated<A> {
 
     /**
      * Creates a Validated that is Valid and contains the value.
+     *
      * @param value The value the Valid contains
-     * @param <A> The type of the validated value
+     * @param <A>   The type of the validated value
      * @return A Validated that is Valid
      */
     static <A> Validated<A> valid(A value) {
@@ -66,6 +73,7 @@ public interface Validated<A> {
 
     /**
      * Creates a Validated that is Fail and contains the message.
+     *
      * @param msg The fail message
      * @param <A> the type of the validated value
      * @return a Validated that is in the Fail state
@@ -77,33 +85,51 @@ public interface Validated<A> {
 
     /**
      * Turns an Optional into a Validated with the supplied message if the Optional is empty
+     *
      * @param optional The optional to check
-     * @param msg the message if the optional is empty
-     * @param <A> the type of the validated object
+     * @param msg      the message if the optional is empty
+     * @param <A>      the type of the validated object
      * @return a new Validated
      */
-    static <A> Validated<A> of(Optional<A> optional, String msg){
-        return optional.map(Validated::valid).orElseGet(()->fail(msg));
+    static <A> Validated<A> of(Optional<A> optional, String msg) {
+        return optional.map(Validated::valid).orElseGet(() -> fail(msg));
     }
 
     /**
      * Turns an fj.data.Option into a Validated with the supplied message if the Optional is empty
+     *
      * @param optional The optional to check
-     * @param msg the message if the optional is empty
-     * @param <A> the type of the validated object
+     * @param msg      the message if the optional is empty
+     * @param <A>      the type of the validated object
      * @return a new Validated
      */
-    static <A> Validated<A> of(Option<A> optional, String msg){
-        return optional.map(Validated::valid).orSome(()->fail(msg));
+    static <A> Validated<A> of(Option<A> optional, String msg) {
+        return optional.map(Validated::valid).orSome(() -> fail(msg));
+    }
+
+    /**
+     * Validates an object by applying it to the supplied predicate.
+     * If the predicate holds, the object is valid.
+     * If the predicate fails, a Fail is returned with the supplied msg.
+     *
+     * @param value     The object to validate
+     * @param predicate The predicate that must hold
+     * @param msg       The message to use if the predicate does ot hold
+     * @param <A>       the type of the object
+     * @return a Validated
+     */
+    static <A> Validated<A> validate(A value, Predicate<A> predicate, String msg) {
+        return predicate.test(value) ? valid(value) : fail(msg);
     }
 
     /**
      * Accumulates the values of two Validated values. If both are Valid, the values are applied to the provided function, returning
      * a Valid with the result of the application.
      * If either Validated is Fail, the Fail is returned. If both are Fail, their messages are append into a new Fail.
-     * @param va A valdiated value a
-     * @param vb A validated value b
-     * @param f the function that joins the values
+     *
+     * @param va  A valdiated value a
+     * @param vb  A validated value b
+     * @param f   the function that joins the values
      * @param <A> the type of a
      * @param <B> the type of b
      * @param <T> the return type of the pfrovided function
@@ -114,7 +140,7 @@ public interface Validated<A> {
     }
 
     static <A, B, T> Validated<T> accum(Validated<A> va, Validated<B> vb, F2<A, B, T> f) {
-        return accum(va,vb,a->b->f.f(a,b));
+        return accum(va, vb, a -> b -> f.f(a, b));
     }
 
     static <A, B, C, T> Validated<T> accum(Validated<A> va, Validated<B> vb, Validated<C> vc, F<A, F<B, F<C, T>>> f) {
@@ -144,6 +170,7 @@ public interface Validated<A> {
 
     /**
      * The class that represents the Valid state of a Validated.
+     *
      * @param <A>
      */
     class Valid<A> implements Validated<A> {
@@ -171,10 +198,11 @@ public interface Validated<A> {
 
         @Override
         public <B> Validated<B> apply(Validated<F<A, B>> vf) {
-            return vf.fold(
-              Fail::new,
-              f -> valid(f.f(value))
-            );
+            return
+              vf.fold(
+                Fail::new,
+                f -> valid(f.f(value))
+              );
         }
 
         @Override
@@ -187,6 +215,7 @@ public interface Validated<A> {
 
     /**
      * The class the represents the Fail state of a validated.
+     *
      * @param <A>
      */
     class Fail<A> implements Validated<A> {
@@ -214,10 +243,11 @@ public interface Validated<A> {
 
         @Override
         public <B> Validated<B> apply(Validated<F<A, B>> vf) {
-            return vf.fold(
-              otherMsgs -> new Fail<>(msgs.append(otherMsgs)),
-              s -> new Fail<>(msgs)
-            );
+            return
+              vf.fold(
+                otherMsgs -> new Fail<>(msgs.append(otherMsgs)),
+                s -> new Fail<>(msgs)
+              );
         }
 
         @Override

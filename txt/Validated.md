@@ -7,25 +7,14 @@ Correct by construction er en artikkelserie for javautviklere som tar opp tips o
 
 "Validering" 
 
-Ordet vekker minner hos enhver systemutvikler. Vi kommer alle innom denne oppgaven fra tid til annen. Ofte forbinder man validering med å sjekke at data som kommer inn et grensesnitt er i korrekt format, f.eks. at et telefonnr består bare av siffer eller "+" eller at et navn er kun bokstaver. Noen ganger tenker man på validering når man sjekker at konfigurasjon er satt opp riktig. Andre ganger igjen brukes det for å fange opp feil der det blir upraktisk at typesystemet verner oss mot det, slik som deling på 0, eller at en verdi er `null`. 
+Ordet vekker minner hos enhver systemutvikler, vi kommer alle innom denne oppgaven fra tid til annen. Ofte forbinder man validering med å sjekke at data som kommer inn et grensesnitt er i korrekt format, f.eks. at et telefonnr består bare av siffer eller "+" eller at et navn er kun bokstaver. Noen ganger tenker man på validering når man sjekker at konfigurasjon er satt opp riktig. Andre ganger igjen brukes det for å fange opp feil der det blir upraktisk at typesystemet verner oss mot det, slik som deling på 0, eller at en verdi er `null`. 
 
 Hvis man skal se litt stort på det, kan man egentlig si at validering er både en _sjekk_ på at en verdi tilfredsstiller en bestemt regel, og *håndtering* av situasjonen dersom den ikke gjør det.
 
-Vi har hatt ulike verktøy som hjelper oss med dette i Java, slik som det innebygde `assert`, eller Bean Validation. Med Java 8 kom også Optional, som flere bruker for å markere en verdi som manglende eller ugyldig. Alle disse tilnærmingene har fordeler, men også ulemper.   I denne artikkelen skal vi se om vi kan finne en måte å utnytte fordelene med Optional, men uten ulempene.
+Vi har hatt ulike verktøy som hjelper oss med dette i Java en stund nå, slik som det innebygde `assert`, eller Bean Validation. Med Java 8 kom også Optional, som flere bruker for å markere en verdi som manglende eller ugyldig. Alle disse tilnærmingene har fordeler, men også ulemper.   I denne artikkelen skal vi se om vi kan finne en måte å utnytte fordelene med Optional-tilnærmingen, men uten ulempene.
 
-Optional hjelper oss å sørge for at vi ikke gjør operasjoner som kaster `RuntimeException`s - f.eks. en nullpointer - ved hjelp av map og flatMap:
-```
-    public Optional<String> getAsString(String paramName){...}
-    public Optional<String> getAsInt(String paramName){...}
-
-    Optional<User> userO =
-        getAsString("username")
-            .flatMap(name-> 
-                getAsInt("age").map(age->
-                    new User(name,age)));
-```
-Litt vel mye paranteser og innrykk, men vi er sånn rimelig sikre på at userO er korrekt.
-Men når man ønsker å rapportere _hvorfor_ det ikke lar seg opprette et objekt er det vanlig å se litt keitete logikk rundt Optional. Dette løses ofte med en orgie av exceptions
+Optional hjelper oss å sørge for at vi ikke gjør operasjoner som kaster `NullPointerException`s ved hjelp av map() og flatMap(),
+men når man ønsker å rapportere _hvorfor_ det ikke lar seg opprette et objekt er det vanlig å se litt keitete logikk rundt Optional. Dette løses ofte med en orgie av exceptions
 ```
 String username = getAsString("username").orElseThrow(()->new IllegalStateException("username not defined"));
 Integer age = getAsInt("age").orElseThrow(()->new IllegalStateException("age not defined);
@@ -87,12 +76,12 @@ Men man ser også et par åpenbar ulemper: Man trenger en ny statisk metode for 
 funksjoner som tar inn mer enn to argumenter i java.
 Det første løser man ganske greit (sjekk koden i medfølgende eksempler), det andre løser man ved å importere et api som støtter dette, feks [functionaljava](http://functionaljava.org) eller [vavr.io](http://vavr.io)
 
-Nå som vi har bestemt oss for hvordan vi løser hvordan vi slår sammen flere validateringer må vi finne ut hvordan vi løser problemet der en validering er avhengig av resultatet fra en annen validering. La oss utvide eksempelet over og anta at getAsString og getAsInt er definert på et Params objekt som lastes inn.
+Nå som vi har bestemt oss for hvordan vi løser hvordan vi slår sammen flere validateringer må vi finne ut hvordan vi løser problemet der en validering er avhengig av resultatet fra en annen validering. La oss utvide eksempelet over og ana at getAsString og getAsInt er definert på et Params objekt som lastes inn.
 
 ```
 interface Param{
-Validated<String> getAsString(String name);
-Validated<Integer> getAsInt(String name);
+    Validated<String> getAsString(String name);
+    Validated<Integer> getAsInt(String name);
 }
 Validated<Param> params = loadParams();
 ```
@@ -135,17 +124,79 @@ La oss sjekke hvordan flatMap brukes.
 Validated<User> user = 
     params.flatMap(p -> Validated.accum(p.getAsString("username"), p.getAsInt("age"), User::new));
 ```
+
+Men vi kan dra den enda litt lenger! Hva om vi ønsker å sikre oss at alderen til brukeren alltid er mellom 0 og 150, slik at vi fanger opp åpenbare feil? Eller enda bedre: Hva om vi gjør dette til en regel som gjelder i hele systemet vårt?
+La oss lage en klasse Age som representerer alder.
+```
+public class Age {
+    public final int value;
+    
+    private Age(int value) {
+        this.value = value;
+    }
+}
+```
+Legg merke til at kosntruktoren er private! Vi vil nemlig ikke at man skal kunne opprette et Age objekt uten først å ha sjekket om tallet er korrekt.
+vi utvider Age litt ved å lage en factory metode som returnerer en `Validated<Age>`:
+```
+public class Age {
+    public final int value;
+    
+    private Age(int value) {
+        this.value = value;
+    }
+
+    /**
+    * The only way to create an Age is through this method, thereby assuring that it is valid.
+    * @param value
+    * @return
+    */
+    public static Validated<Age> toAge(int value) {
+        return Validated.validate(value, v -> (v >= 0 && v < 150), " The age must be in the range [0,150)").map(Age::new);
+    }
+}
+```
+Eneste måten å opprette et Age objekt nå er gjennom factory metoden, og den sjekker om verdien er gyldig og pakker age inn i en Validation.
+Vi kan nå sammenfatte alt i et eksempel:
+
+```
+public class ValidatedExample {
+
+    public static void main(String[] args) {
+        var settings = Settings.empty();
+
+        var username = settings.getAsString("username");
+        var age = settings.getAsInt("age").flatMap(Age::toAge);
+
+        var user = Validated.accum(username, age, User::new);
+
+        //Prints out a Fail with two messages
+        System.out.println(user);
+
+        var settings2 = settings.with("age", 35).with("username", "Ola");
+        var username2 = settings2.getAsString("username");
+        var age2 = settings2.getAsInt("age").flatMap(Age::toAge);
+
+        var user2 = Validated.accum(username2, age2, User::new);
+
+        //Prints out a Valid user
+        System.out.println(user2);
+        }
+}
+```
 Sweet!
+
 
 Uten noe særlig boilerplate kan vi nå
 1) kvitte oss med exceptions
 2) samle feilmeldinger
 3) nøste valideringer
 4) slå sammen valideringer dersom alle er gyldige, eller summere feilmeldingene for eventuelle feil
+5) være helt sikre på at objekter vi oppretter inneholder gyldige verdier.
 
+Og det beste er at vi kan bruke samme prinsipp overalt, og at vi kan bruke det på samme måte som Optional. Herlig :)
 
-
-For å se selve implementasjonen er det greiest å bare se på koden til [implementasjonen](https://github.com/kantega/correct-by-construction/blob/master/code/src/main/java/org/kantega/cbyc/Validated.java)  og [eksempelet](https://github.com/kantega/correct-by-construction/blob/master/code/src/test/java/org/katenga/cbc/validated/ValidatedExample.java)
+For å se selve implementasjonen av Validation er det greiest å bare se på koden til [implementasjonen](https://github.com/kantega/correct-by-construction/blob/master/code/src/main/java/org/kantega/cbyc/Validated.java)  og [eksempelet](https://github.com/kantega/correct-by-construction/blob/master/code/src/test/java/org/katenga/cbc/validated/ValidatedExample.java)
 
 Det kan jo også hende at man istedenfor å bare beholde en feilmelding har lyst til å lagre en liste med Exceptions istedenfor, da kan man beholde stacktracen også, som jo kan være veldig praktisk. Eller så ønsker man enda større frihet og vil bestemme fra gang til gang hva feil-tilstanden skal inneholde. Dette finnes heldigvis allerede implementert i en rekke biblioteker, f.eks. vavr.io eller functionaljava.com så jeg kan enbefale en titt der. Ellers så kan man ta koden fra eksempelet her og modde den etter egent behov.
 
