@@ -39,3 +39,10 @@ Vi må være helt sikre på at Email ikke endrer seg etter at den er validert, d
 ```
 {...}
 ```
+
+Nå må vi gjøre det helt sikkert at det ikke går an å opprette en Email som har ugyldig syntaks. Dette får vi til ved å gjøre konstruktoren private, og lage en factory metode som returnerer Validated<Email>. Dette gjør det _umulig_ å få tak i eller bruke et epostobjekt som ikke er validert og gyldig. Når man nå får tak i et Email objekt vet man at det er gyldig, og man trenger ikke sjekke dette flere steder i applikasjonen. Kompilatoren vil varsle deg dersom du prøver opprette en uten å validere først.
+
+Bonus med denne framgangmåten er at det er lett å bruke, siden man ikke trenger rammeverkstøtte.
+
+
+
