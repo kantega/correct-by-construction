@@ -2,7 +2,7 @@ package org.katenga.cbc.validated;
 
 import org.kantega.cbyc.Validated;
 
-public class ValidatedExample {
+public class RunValidatedExample {
 
     public static void main(String[] args) {
         var settings = Settings.empty().with("age", 235);

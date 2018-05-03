@@ -15,6 +15,27 @@ Roundtrip: ` <-- rask --------- treg --> `
 
 Det er logisk at mest mulig av testingen bør foregå til venstre. Jo mer vi gjør av den til venstre, jo mindre trenger vi å gjøre til høyre. Det er billigere og raskere og enklere. Men det finnes også noe som er _enda lenger til venstre_ på aksten _før_ man i det hele tatt _kommer_ til testing!
 
-For den aller raskeste tilbakemeldingen får du av kompilatoren. Den tester om programmet ditt er gyldig! (Vel - syntaktisk gyldig da i hvertfall). Og det er her vi skal begynne: Vi skal se på hvordan vi kan lage programmene våre slik at man _ikke trenger_ teste så mye. Tenk deg det! Slippe å vedlikeholde tester, og _samtidig_ sove godt om natta!
+For den aller raskeste tilbakemeldingen får du av kompilatoren. Den tester om programmet ditt er gyldig! (Vel - syntaktisk gyldig da i hvertfall, og semantisk med tanke på programmeringsspråket, men det er ikke så viktig). Og det er her vi skal begynne: Vi skal se på hvordan vi kan lage programmene våre slik at man _ikke trenger_ teste så mye. Tenk deg det! Slippe å vedlikeholde tester, og _samtidig_ sove godt om natta!
 
+La oss lage oss et lite case som ligner litt på det vi ser fra virkeligheten, men samtidig er så enkelt at det ikke blir for mye arbeid. Vi kan f.eks. tenke oss at vi lager en applikasjon som bl.a. skal håndtere kontaktinformasjon. Vi starter med epost.
 
+Hvis vi skal lage et skikkelig enterprisey system bruker vi sikkert jax-rs + jackson. Da kunne vi ha brukt annotasjoner for å være sikre på at data som kommer inn er korrekt:
+```
+class ContactInfo{
+
+    ...
+
+}
+```
+og bruke den slik:
+```
+{...}
+```
+Vel og bra. Men - vi må lage tester _for alle situasjoner_ der data puttes inn i en ContactInfo objekt. Vi er også avhengig av et rammeverk som gjør dette for oss. Og vi blir ikke varslet dersom vi glemmer å validere. 
+La oss se om vi kan gjøre det slik at vi får en _kompileringsfeil_ dersom vi prøver å bruke et uvalidert objekt.
+
+Forrige artikkel handlet om Validering, la oss gjenbruke klassen vi lagde der: Validated. La oss lage en egen domeneklasse for epost, og modde litt op Contact info.
+Vi må være helt sikre på at Email ikke endrer seg etter at den er validert, det betyr at vi må gjøre den immutable. Det får vi til ved å sørge for at alt innhold i klassen er _final_, og at alt innholdet er immutable. String er immutable, så da kan vi lage klassen:
+```
+{...}
+```
