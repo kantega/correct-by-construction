@@ -1,20 +1,20 @@
-package org.kantega.cbc.testless.validated;
+package org.kantega.cbc.testless._2validated;
 
 import org.apache.commons.validator.routines.EmailValidator;
 import org.kantega.cbyc.Validated;
 
-public class Email {
+public class EmailAddress {
 
     final String value;
 
-    private Email(String value) {
+    private EmailAddress(String value) {
         this.value = value;
     }
 
-    public static Validated<Email> of(String value) {
+    public static Validated<EmailAddress> of(String value) {
         return
           EmailValidator.getInstance().isValid(value) ?
-            Validated.valid(new Email(value)) :
+            Validated.valid(new EmailAddress(value)) :
             Validated.fail("Feil format");
     }
 

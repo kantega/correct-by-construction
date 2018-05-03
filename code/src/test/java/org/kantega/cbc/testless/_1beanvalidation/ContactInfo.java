@@ -1,4 +1,4 @@
-package org.kantega.cbc.testless.beanvalidation;
+package org.kantega.cbc.testless._1beanvalidation;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;

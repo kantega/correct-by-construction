@@ -1,4 +1,4 @@
-package org.kantega.cbc.testless.beanvalidation;
+package org.kantega.cbc.testless._1beanvalidation;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -6,7 +6,7 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.util.Set;
 
-public class RunBeanValidation {
+public class Example1 {
 
     public static void main(String[] args) {
         ValidatorFactory factory =

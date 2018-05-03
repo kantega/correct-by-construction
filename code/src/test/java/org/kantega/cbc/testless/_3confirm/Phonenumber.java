@@ -1,4 +1,4 @@
-package org.kantega.cbc.testless.validated;
+package org.kantega.cbc.testless._3confirm;
 
 import fj.Digit;
 import fj.data.List;
