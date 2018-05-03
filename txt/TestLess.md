@@ -44,5 +44,18 @@ Nå må vi gjøre det helt sikkert at det ikke går an å opprette en Email som 
 
 Bonus med denne framgangmåten er at det er lett å bruke, siden man ikke trenger rammeverkstøtte.
 
+For å gjøre det litt mer interessant lager vi et tilsvarende for telefonnummer også:
+```{...}```
+
+Det kan virke som litt pes å lagre tallene i et telefonnummer som en ikke-tom liste med siffer. Men nå er vi sikre at det ikke er en random tekststreng, vi vet at listen ikke er tom, og vi vet at det er gyldige siffer på hver plass. Vi trenger ikke teste det! Det eneste som må testes i of() er dersom vi lager litt mer kompliserte regler for gyldige tall, så må vi sjekke at disse stemmer for alle gyldige telefonnummer. (Det høres ut som sirkellogikk, så det fikser vi en senere artikkel)
+
+Vi setter nå dette inn i ContactInfo slik vi lærte forrige artikkel:
+```{...}```
+
+
+Ok, nå har vi gjort to konverteringer, uten at det egentlig går an å skrive en meningsfull test for det. Fordi det ikke kan være feil, kompilatoren sjekker det for oss.
+
+Men dette var enkelt og trivielt. La oss utvide caset vårt litt. 
+Epostadressen må jo bekreftes av brukeren. Det øker sannsynligheten for at den stemmer (la oss anta at vi ikke vil eller kan bruke OpenId Connect for pålogging)
 
 

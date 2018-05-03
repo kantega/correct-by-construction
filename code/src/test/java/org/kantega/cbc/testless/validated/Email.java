@@ -1,4 +1,4 @@
-package org.kantega.cbc.testless.stage2;
+package org.kantega.cbc.testless.validated;
 
 import org.apache.commons.validator.routines.EmailValidator;
 import org.kantega.cbyc.Validated;
@@ -15,7 +15,7 @@ public class Email {
         return
           EmailValidator.getInstance().isValid(value) ?
             Validated.valid(new Email(value)) :
-            Validated.fail("Incorrect format");
+            Validated.fail("Feil format");
     }
 
     @Override
