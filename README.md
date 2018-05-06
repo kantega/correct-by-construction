@@ -1,5 +1,5 @@
 # correct-by-construction
-A series of articles about maximizing the use of the compiler
+En serie korte artikler om hbordan man utnytter kompilatoren for å skrive bugfri software.
 
- 1. Validation
- 1. Test less
+ 1. [Validation](https://github.com/kantega/correct-by-construction/blob/master/txt/TestLess.md)
+ 1. [Test less](https://github.com/kantega/correct-by-construction/blob/master/txt/Validated.md)
