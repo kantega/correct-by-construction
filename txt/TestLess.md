@@ -236,7 +236,7 @@ public static void main(String[] args) {
 
 }
 ```
-Oi. Mange vil tenke at dette ser veldig ukjent og rotete ur. Nå tenker du kanskje at exceptions eller casting, eller sågar bare å sette et flagg i Emailaddress hadde vært mer lettvint. Og svaret er nok utvilsom ja. Men da åpner du opp for at man kan havne i en ugyldig tilstand! Da ville det være mulig  å sende ut mail til en ubekreftet adresse. Dette må du dermed skrive tester for å validere. Og siden de testene må sjekke tilstandsendringen over tid - nemlig at en mail først ikke kan sendes ut, og så sendes ut - blir det adskillig mer arbeid å veldikeholde testene, enn å bare legge på et ekstra lag med typesikkerhet.
+Oi. Mange vil tenke at dette ser veldig ukjent og rotete ut. Du tenker kanskje at exceptions eller casting, eller sågar bare å sette et flagg i Emailaddress hadde vært mer lettvint. Og svaret er nok utvilsom ja. Men da åpner du opp for at man kan havne i en ugyldig tilstand! Da ville det være mulig  å sende ut mail til en ubekreftet adresse. Dette må du dermed skrive tester for å validere. Og siden de testene må sjekke tilstandsendringen over tid - nemlig at en mail først ikke kan sendes ut, og så sendes ut - blir det adskillig mer arbeid å veldikeholde testene, enn å bare legge på et ekstra lag med typesikkerhet.
 Kanskje er det verdt å øve seg på å lese slik kode allikevel da? Jeg mener - _ingen testing_?
 
 En bonus med å være så eksplisitt med de ulike tilstandene et objekt kan ha er at man blir tvunget til å tenke gjennom grensetilfellene fra starten: Hva om brukeren ikke finnes (den kan jo bli slettet i mellomtiden). Hva skal systemet gjøre dersom man forsøke sende mail til en ubekreftet adresse? Vær ærlig, dette er problemstillinger vi ofte skyver på til det smeller.
