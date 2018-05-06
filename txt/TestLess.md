@@ -210,7 +210,6 @@ public interface EmailAddress {
     }
 }
 ```
-
 For å hente ut data blir vi nå tvunget til å bruke fold , og da _må_ vi håndtere begge de mulige tilstandene til Emailaddress. Skipper vi det får vi en kompileringsfeil. 
 Så dersom vi f.eks. skal sende ut et ukessammendrag på mail til en bruker, så lager vi oss en sammendrags-klasse som inneholder en EmailAdress.Confirmed. På denne måten kan vi ikke opprette et Sammendragsobjekt uten en bekreftet epostadresse. men vi kan ikke hoppe bukk over caset der adressen ikke er bekreftet.
 ```java
@@ -228,9 +227,9 @@ public static void main(String[] args) {
     final Validated<DigestMessage> validatedDigest =
         maybeInfo
             .map(contactInfo -> contactInfo.email)
-            .map(emailAddress -> emailAddress.fold(
-                unconfirmed -> Validated.<DigestMessage>fail("Epostadressen er ikke bekreftet"),
-                confirmed -> Validated.valid(new DigestMessage(confirmed, digestSubject))))
+            .map(emailAddress -> emailAddress.fold( //her bruker vi fold 
+                unconfirmed -> Validated.<DigestMessage>fail("Epostadressen er ikke bekreftet"), //kjøres dersom post er ubekreftet
+                confirmed -> Validated.valid(new DigestMessage(confirmed, digestSubject)))) //kjøres dersom bekreftet
             .orElseGet(() -> Validated.fail("Brukeren finnes ikke i databasen"));
 
     System.out.println(validatedDigest);
