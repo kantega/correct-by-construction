@@ -152,7 +152,7 @@ Men dette var enkelt og trivielt. La oss utvide caset vårt litt.
 Epostadressen må jo bekreftes av brukeren. Det øker sannsynligheten for at den stemmer (la oss anta at vi ikke vil eller kan bruke OpenId Connect for pålogging)
 
 Vi endrer EmailAddress til et interface med to implementasjoner: Unconfirmed og Confirmed, og så definerer vi en fold() metode. Denne fungerer akkurat som en visitor, bare at den returnerer en verdi. Vi lar også fold være den _eneste_ måten å hente ut informasjon fra Emailaddress på.
-````
+```
 public interface EmailAddress {
 
     <T> T fold(
@@ -211,10 +211,35 @@ public interface EmailAddress {
     }
 }
 ```
+
 For å hente ut data blir vi nå tvunget til å bruke fold , og da _må_ vi håndtere begge de mulige tilstandene til Emailaddress. Skipper vi det får vi en kompileringsfeil. 
 Så dersom vi f.eks. skal sende ut et ukessammendrag på mail til en bruker, så lager vi oss en sammendrags-klasse som inneholder en EmailAdress.Confirmed. På denne måten kan vi ikke opprette et Sammendragsobjekt uten en bekreftet epostadresse. men vi kan ikke hoppe bukk over caset der adressen ikke er bekreftet.
+```
+public static void main(String[] args) {
 
-Nå tenker du kanskje at exceptions eller casting, eller sågar bare å sette et flagg i Emailaddress hadde vært mer lettvint. Og svaret er nok utvilsom ja. Men da åpner du opp for at man kan havne i en ugyldig tilstand! Da ville det være mulig  å sende ut mail til en ubekreftet adresse. Dette må du dermed skrive tester for å validere. Og siden de testene må sjekke tilstandsendringen over tid - nemlig at en mail først ikke kan sendes ut, og så sendes ut - blir det adskillig mer arbeid å veldikeholde testene, enn å bare legge på et ekstra lag med typesikkerhet.
+    final String digestSubject =
+        "Dette er en oppsummering";
+
+    //Vi skal sende ut en oppsummering til en bruker, men
+    // 1) Brukeren må finnes
+    // 2) Brukeren må ha bekreftet eposten sin
+    final Optional<ContactInfo> maybeInfo =
+        Database.infoForId("a"); //Prøv med b eller c også
+
+    final Validated<DigestMessage> validatedDigest =
+        maybeInfo
+            .map(contactInfo -> contactInfo.email)
+            .map(emailAddress -> emailAddress.fold(
+                unconfirmed -> Validated.<DigestMessage>fail("Epostadressen er ikke bekreftet"),
+                confirmed -> Validated.valid(new DigestMessage(confirmed, digestSubject))))
+            .orElseGet(() -> Validated.fail("Brukeren finnes ikke i databasen"));
+
+    System.out.println(validatedDigest);
+
+}
+```
+Oi. Mange vil tenke at dette ser veldig ukjent og rotete ur. Nå tenker du kanskje at exceptions eller casting, eller sågar bare å sette et flagg i Emailaddress hadde vært mer lettvint. Og svaret er nok utvilsom ja. Men da åpner du opp for at man kan havne i en ugyldig tilstand! Da ville det være mulig  å sende ut mail til en ubekreftet adresse. Dette må du dermed skrive tester for å validere. Og siden de testene må sjekke tilstandsendringen over tid - nemlig at en mail først ikke kan sendes ut, og så sendes ut - blir det adskillig mer arbeid å veldikeholde testene, enn å bare legge på et ekstra lag med typesikkerhet.
+Kanskje er det verdt å øve seg på å lese slik kode allikevel da? Jeg mener - _ingen testing_?
 
 En bonus med å være så eksplisitt med de ulike tilstandene et objekt kan ha er at man blir tvunget til å tenke gjennom grensetilfellene fra starten: Hva om brukeren ikke finnes (den kan jo bli slettet i mellomtiden). Hva skal systemet gjøre dersom man forsøke sende mail til en ubekreftet adresse? Vær ærlig, dette er problemstillinger vi ofte skyver på til det smeller.
 
