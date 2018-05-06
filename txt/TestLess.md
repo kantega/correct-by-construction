@@ -150,7 +150,7 @@ Ok, nå har vi gjort to konverteringer, uten at det egentlig går an å skrive e
 Men dette var enkelt og trivielt. La oss utvide caset vårt litt. 
 Epostadressen må jo bekreftes av brukeren. Det øker sannsynligheten for at den stemmer (la oss anta at vi ikke vil eller kan bruke OpenId Connect for pålogging)
 
-Vi endrer EmailAddress til et interface med to implementasjoner: Unconfirmed og Confirmed, og så definerer vi en fold() metode. Denne fungerer akkurat som en visitor, bare at den returnerer en verdi. Vi lar også fold være den _eneste_ måten å hente ut informasjon fra Emailaddress på.
+Vi endrer EmailAddress til et interface med to implementasjoner: Unconfirmed og Confirmed, og så definerer vi en fold() metode. Denne fungerer akkurat som en visitor, bare at den returnerer en verdi. Vi lar også fold være den _eneste_ måten å hente ut informasjon fra EmailAddress på.
 ```java
 public interface EmailAddress {
 
@@ -210,7 +210,7 @@ public interface EmailAddress {
     }
 }
 ```
-For å hente ut data blir vi nå tvunget til å bruke fold , og da _må_ vi håndtere begge de mulige tilstandene til Emailaddress. Skipper vi det får vi en kompileringsfeil. 
+For å hente ut data blir vi nå tvunget til å bruke fold , og da _må_ vi håndtere begge de mulige tilstandene til EmailAddress. Skipper vi det får vi en kompileringsfeil. 
 Så dersom vi f.eks. skal sende ut et ukessammendrag på mail til en bruker, så lager vi oss en sammendrags-klasse som inneholder en EmailAdress.Confirmed. På denne måten kan vi ikke opprette et Sammendragsobjekt uten en bekreftet epostadresse. men vi kan ikke hoppe bukk over caset der adressen ikke er bekreftet.
 ```java
 public static void main(String[] args) {
