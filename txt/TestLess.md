@@ -18,7 +18,7 @@ For den aller raskeste tilbakemeldingen får du av kompilatoren. Den tester om p
 La oss lage oss et lite case som ligner litt på det vi ser fra virkeligheten, men samtidig er så enkelt at det ikke blir for mye arbeid. Vi kan f.eks. tenke oss at vi lager en applikasjon som bl.a. skal håndtere kontaktinformasjon. Vi starter med epost.
 
 Hvis vi skal lage et skikkelig enterprisey system bruker vi sikkert jax-rs + jackson. Da kunne vi ha brukt annotasjoner for å være sikre på at data som kommer inn er korrekt:
-```
+```java
 public class ContactInfo {
 
     @Email
@@ -35,7 +35,7 @@ public class ContactInfo {
 }
 ```
 og bruke den slik:
-```
+```java
 public class Example1 {
 
     public static void main(String[] args) {
@@ -73,8 +73,7 @@ La oss se om vi kan gjøre det slik at vi får en _kompileringsfeil_ dersom vi p
 
 [Forrige artikkel](https://github.com/kantega/correct-by-construction/blob/master/txt/Validated.md) handlet om Validering, la oss gjenbruke klassen vi lagde der: Validated. La oss lage en egen domeneklasse for epost, og modde litt på caset vårt. Vi modder litt på ContactInfo, og lager klassen EmailAdress.
 Vi må være helt sikre på at EmailAdress ikke endrer seg etter at den er validert, det betyr at vi må gjøre den immutable. Det får vi til ved å sørge for at alt innhold i klassen er _final_, og at alt innholdet er immutable. String er immutable, så da kan vi lage klassen:
-```
-
+```java
 public class EmailAddress {
 
     final String value;
@@ -107,7 +106,7 @@ public class EmailAddress {
 Bonus med denne framgangmåten er at det er lett å bruke, siden man ikke trenger rammeverkstøtte.
 
 For å gjøre det litt mer interessant lager vi et tilsvarende for telefonnummer også:
-```
+```java
 public class Phonenumber {
 
     final NonEmptyList<Digit> digits;
@@ -131,7 +130,7 @@ public class Phonenumber {
 Det kan virke som litt pes å lagre tallene i et telefonnummer som en ikke-tom liste med siffer. Men nå er vi sikre at det ikke er en random tekststreng, vi vet at listen ikke er tom, og vi vet at det er gyldige siffer på hver plass. Vi trenger ikke teste det! Dersom vi lager litt mer kompliserte regler for gyldige telefonnummer, så må vi lage en test for at disse stemmer for alle gyldige telefonnummer. Det høres ut som sirkellogikk, så det fikser vi en senere artikkel.
 
 Vi setter nå dette inn i ContactInfo slik vi lærte forrige artikkel:
-```
+```java
 ...
     public static void main(String[] args) {
 
@@ -152,7 +151,7 @@ Men dette var enkelt og trivielt. La oss utvide caset vårt litt.
 Epostadressen må jo bekreftes av brukeren. Det øker sannsynligheten for at den stemmer (la oss anta at vi ikke vil eller kan bruke OpenId Connect for pålogging)
 
 Vi endrer EmailAddress til et interface med to implementasjoner: Unconfirmed og Confirmed, og så definerer vi en fold() metode. Denne fungerer akkurat som en visitor, bare at den returnerer en verdi. Vi lar også fold være den _eneste_ måten å hente ut informasjon fra Emailaddress på.
-```
+```java
 public interface EmailAddress {
 
     <T> T fold(
@@ -214,7 +213,7 @@ public interface EmailAddress {
 
 For å hente ut data blir vi nå tvunget til å bruke fold , og da _må_ vi håndtere begge de mulige tilstandene til Emailaddress. Skipper vi det får vi en kompileringsfeil. 
 Så dersom vi f.eks. skal sende ut et ukessammendrag på mail til en bruker, så lager vi oss en sammendrags-klasse som inneholder en EmailAdress.Confirmed. På denne måten kan vi ikke opprette et Sammendragsobjekt uten en bekreftet epostadresse. men vi kan ikke hoppe bukk over caset der adressen ikke er bekreftet.
-```
+```java
 public static void main(String[] args) {
 
     final String digestSubject =
