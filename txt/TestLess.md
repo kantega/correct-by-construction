@@ -11,7 +11,7 @@ Og til slutt har man har også produksjon, der sluttbrukerne hver dag tester sys
 
 Det trente øyet ser at alle disse testvariantene ligger på et kontinuum, der de enkleste testene gir raskest tilbakemelding og er enklest å lage, mens "testene" i produksjon kan være adskillig mer krevende å reagere på. 
 
-Men vi akn gjøre det enda bedre! For det finnes også noe som kan gjøres  _før_ man i det hele tatt _kommer_ til testing!
+Men vi kan gjøre det enda bedre! For det finnes også noe som kan gjøres  _før_ man i det hele tatt _kommer_ til testing!
 
 For den aller raskeste tilbakemeldingen får du av kompilatoren. Den tester om programmet ditt er gyldig! (Vel - syntaktisk gyldig da i hvertfall, og semantisk med tanke på programmeringsspråket, men det er ikke så viktig). Og det er her vi skal begynne: Vi skal se på hvordan vi kan lage programmene våre slik at man _ikke trenger_ teste så mye. Tenk deg det! Slippe å vedlikeholde tester, og _samtidig_ sove godt om natta!
 
