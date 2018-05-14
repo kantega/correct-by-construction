@@ -196,7 +196,7 @@ Uten noe særlig boilerplate kan vi nå
 
 Og det beste er at vi kan bruke samme prinsipp overalt, og at vi kan bruke det på samme måte som Optional. Herlig :)
 
-For å se selve implementasjonen av Validation er det greiest å bare se på koden til [implementasjonen](https://github.com/kantega/correct-by-construction/blob/master/code/src/main/java/org/kantega/cbyc/Validated.java)  og [eksempelet](https://github.com/kantega/correct-by-construction/blob/master/code/src/test/java/org/katenga/cbc/validated/ValidatedExample.java)
+For å se selve implementasjonen av Validation er det greiest å bare se på koden til [implementasjonen](https://github.com/kantega/correct-by-construction/blob/master/code/src/main/java/org/kantega/cbyc/Validated.java)  og [eksempelet](https://github.com/kantega/correct-by-construction/blob/master/code/src/test/java/org/katenga/cbc/validated/RunValidatedExample.java)
 
 Det kan jo også hende at man istedenfor å bare beholde en feilmelding har lyst til å lagre en liste med Exceptions istedenfor, da kan man beholde stacktracen også, som jo kan være veldig praktisk. Eller så ønsker man enda større frihet og vil bestemme fra gang til gang hva feil-tilstanden skal inneholde. Dette finnes heldigvis allerede implementert i en rekke biblioteker, f.eks. vavr.io eller functionaljava.com så jeg kan enbefale en titt der. Ellers så kan man ta koden fra eksempelet her og modde den etter egent behov.
 
