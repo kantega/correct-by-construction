@@ -28,6 +28,6 @@ public class RunValidatedExample {
         //100%-, sure thing-, guaranteed-, cannot fail-,
         //valid user.
         var validUser =
-          user2.getOrDefault(new User("unknown",Age.zero));
+          user2.orElse(new User("unknown",Age.zero));
     }
 }

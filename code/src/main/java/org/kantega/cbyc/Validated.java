@@ -66,7 +66,7 @@ public interface Validated<A> {
      * @param defaultValue The value to return of the Validated was a Fail
      * @return The valid value or the default value.
      */
-    default A getOrDefault(A defaultValue){
+    default A orElse(A defaultValue){
         return fold(
           t->defaultValue,
           v->v

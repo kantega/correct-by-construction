@@ -13,7 +13,8 @@ Hvis man skal se litt stort på det, kan man egentlig si at validering er både 
 
 Vi har hatt ulike verktøy som hjelper oss med dette i Java en stund nå, slik som det innebygde `assert`, eller Bean Validation. Med Java 8 kom også Optional, som flere bruker for å markere en verdi som manglende eller ugyldig. Alle disse tilnærmingene har fordeler, men også ulemper.   I denne artikkelen skal vi se om vi kan finne en måte å utnytte fordelene med Optional-tilnærmingen, men uten ulempene.
 
-Optional hjelper oss å sørge for at vi ikke gjør operasjoner som kaster `NullPointerException`s ved hjelp av map() og flatMap(),
+
+**Optional** hjelper oss å sørge for at vi ikke gjør operasjoner som kaster `NullPointerException`s ved hjelp av map() og flatMap(),
 men når man ønsker å rapportere _hvorfor_ det ikke lar seg opprette et objekt er det vanlig å se litt keitete logikk rundt Optional. Dette løses ofte med en orgie av exceptions
 ```
 String username = getAsString("username").orElseThrow(()->new IllegalStateException("username not defined"));
@@ -32,7 +33,7 @@ Eller så behandler man Optional som en litt brysom null:
 }
 ```
 
-Men vi kan gjøre det bedre! 
+**Men vi kan gjøre det bedre!**
 Ville det ikke være bedre å kombinere Optional med feilrapportering - dog uten å måtte kaste exceptions hele tiden? Kunne man kanskje også samle alle feilene i en bolk dersom man skulle ønske dette? Og kunne man i tillegg unngå alle innrykkene som flatMap krever?
 Svaret er selvfølgelig ja. 
 
@@ -45,7 +46,7 @@ I Java er det greit å representere denne dualiteten med et grensesnitt `Validat
 
 Ok, hvordan skal vi så lage en Validated? Vi trenger i hvertfall to statiske factory metoder, la oss kalle gi dem åpenbare  navn `Validated<T> valid(A a)` og `Validated<T> fail(String msg)`.  Videre kan det være greit å kunne konvertere en Optional til en Validated: `Validated<T> of(Optional<T> o, String onEmpty)`.
 
-La oss se hvordan Validated kan erstatte Optional:
+Så undersøker vi hvordan Validated kan erstatte Optional:
 ```
 Validated<String> username = Validated.of(getAsString("username"),"username not defined"));
 Validated<Integer> age = Validated.of(getAsInt("age"),"age not defined));
@@ -70,8 +71,7 @@ Validated<Integer> age = Validated.of(getAsString("age"),"age not defined));
 
 Validated<User> user = Validated.accum(username,age,User::new);
 ```
-Ikke så verst!
-`user` inneholder nå enten alle feilmeldingene, eller et User objekt.
+**Ikke så verst!** `user` inneholder nå enten alle feilmeldingene, eller et User objekt.
 Men man ser også et par åpenbar ulemper: Man trenger en ny statisk metode for hvert antall Validated objekt man ønsker å kombinere, og det finnes ikke noen standard `@FunctionalInterface` for
 funksjoner som tar inn mer enn to argumenter i java.
 Det første løser man ganske greit (sjekk koden i medfølgende eksempler), det andre løser man ved å importere et api som støtter dette, feks [functionaljava](http://functionaljava.org) eller [vavr.io](http://vavr.io)
@@ -86,11 +86,11 @@ interface Param{
 Validated<Param> params = loadParams();
 ```
 
-Hvordan skal vi nå få ut username og age?  La oss se på hvordan man bruker en Optional for inspirasjon. 
+**Hvordan skal vi nå få ut username og age?**  La oss se på hvordan man bruker en Optional for inspirasjon. 
 Dersom man skal manipulere et objekt i en Optional, uten å måtte sjekke om den er defined først, bruker vi map(). map() tar inn en funksjon som endrer innholdet . Denne funksjonen anvendes bare dersom Optional er defined. Så dersom vi kaller map på en Optional som er empty, skjer det ingenting. Dette virker furniftig å ha på Validated også.
 Men validated "inneholder" data i både Valid og Failed tilstandene, så vi må bestemme oss for hvilken tilstand map skal gjelde for. Siden det vanligvis ikke er så spennende å endre feilmeldinger bestemmer vi oss for at map skal gjelde Valid og bli ignorert ved Failed.
 
-la oss skrive javadoc og signatur for map:
+La oss skrive javadoc og signatur for map:
 ```
 /**
 * If the Validated is Valid, then this method return a new Validated with the function applied to its contents. If the Validated is
@@ -136,7 +136,7 @@ public class Age {
     }
 }
 ```
-Legg merke til at kosntruktoren er private! Vi vil nemlig ikke at man skal kunne opprette et Age objekt uten først å ha sjekket om tallet er korrekt.
+Legg merke til at konstruktoren er private! Vi vil nemlig ikke at man skal kunne opprette et Age objekt uten først å ha sjekket om tallet er korrekt.
 vi utvider Age litt ved å lage en factory metode som returnerer en `Validated<Age>`:
 ```
 public class Age {
@@ -187,7 +187,20 @@ public class ValidatedExample {
 Sweet!
 
 
-Uten noe særlig boilerplate kan vi nå
+**Men hvordan får vi tak i verdien til slutt?** 
+Optional har _orElse()_ , la oss legge på det samme:
+```
+/**
+* If the Validated is Valid, then returns the contained value. If not it return the provided default value.
+* @param defaultValue The value to return of the Validated was a Fail
+* @return The valid value or the default value.
+*/
+default A orElse(A defaultValue){...}
+```
+
+Den fungerer akkurat som man forventer: Dersom det er en Valid så får du ut verdien, hvis ikke får du en default verdi.
+
+**Uten noe særlig boilerplate** kan vi nå
 1) kvitte oss med exceptions
 2) samle feilmeldinger
 3) nøste valideringer
@@ -195,6 +208,10 @@ Uten noe særlig boilerplate kan vi nå
 5) være helt sikre på at objekter vi oppretter inneholder gyldige verdier.
 
 Og det beste er at vi kan bruke samme prinsipp overalt, og at vi kan bruke det på samme måte som Optional. Herlig :)
+
+
+**Det er fortsatt mange muligheter med Validated**. Man kan kaste exceptions ved feil, eller hekte på logging, avhengig av prosjektet du jobber på. Forhåpentligvis kan du nå
+komme i gang med å lage din egen Validated slik at den passer dine behov. 
 
 For å se selve implementasjonen av Validation er det greiest å bare se på koden til [implementasjonen](https://github.com/kantega/correct-by-construction/blob/master/code/src/main/java/org/kantega/cbyc/Validated.java)  og [eksempelet](https://github.com/kantega/correct-by-construction/blob/master/code/src/test/java/org/katenga/cbc/validated/RunValidatedExample.java)
 
