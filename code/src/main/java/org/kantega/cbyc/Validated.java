@@ -60,6 +60,18 @@ public interface Validated<A> {
      */
     <B> Validated<B> apply(Validated<F<A, B>> vf);
 
+
+    /**
+     * If the Validated is Valid, then returns the contained value. If not it return the provided default value.
+     * @param defaultValue The value to return of the Validated was a Fail
+     * @return The valid value or the default value.
+     */
+    default A getOrDefault(A defaultValue){
+        return fold(
+          t->defaultValue,
+          v->v
+        );
+    }
     /**
      * Creates a Validated that is Valid and contains the value.
      *
