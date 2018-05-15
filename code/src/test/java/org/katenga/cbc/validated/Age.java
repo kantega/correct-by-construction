@@ -4,6 +4,8 @@ import org.kantega.cbyc.Validated;
 
 public class Age {
 
+    public static final Age zero = new Age(0);
+
     public final int value;
 
     private Age(int value) {

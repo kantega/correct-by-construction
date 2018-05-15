@@ -24,5 +24,10 @@ public class RunValidatedExample {
 
         //Prints out a Valid user
         System.out.println(user2);
+
+        //100%-, sure thing-, guaranteed-, cannot fail-,
+        //valid user.
+        var validUser =
+          user2.getOrDefault(new User("unknown",Age.zero));
     }
 }
