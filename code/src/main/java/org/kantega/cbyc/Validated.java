@@ -151,6 +151,10 @@ public interface Validated<A> {
         return vb.apply(va.map(f));
     }
 
+    static <A, B, T> Validated<T> accumBind(Validated<A> va, Validated<B> vb, F<A, F<B, Validated<T>>> f) {
+        return vb.apply(va.map(f)).flatMap(i->i);
+    }
+
     static <A, B, T> Validated<T> accum(Validated<A> va, Validated<B> vb, F2<A, B, T> f) {
         return accum(va, vb, a -> b -> f.f(a, b));
     }
