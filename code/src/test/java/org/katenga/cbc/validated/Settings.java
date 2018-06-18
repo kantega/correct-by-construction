@@ -4,6 +4,8 @@ import fj.Ord;
 import fj.data.TreeMap;
 import org.kantega.cbyc.Validated;
 
+import java.util.Optional;
+
 import static org.kantega.cbyc.Validated.fail;
 import static org.kantega.cbyc.Validated.valid;
 
@@ -36,7 +38,7 @@ public class Settings {
     public <A> Validated<A> getAs(String key, Class<A> type) {
         return
           Validated
-            .of(settings.get(key), "The settings does not contain any value with key '" + key + "'")
+            .of(settings.get(key).option(Optional.empty(), Optional::of), "The settings does not contain any value with key '" + key + "'")
             .flatMap(o -> cast(o, type));
     }
 

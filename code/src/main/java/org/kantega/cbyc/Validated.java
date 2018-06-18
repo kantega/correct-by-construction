@@ -1,10 +1,11 @@
 package org.kantega.cbyc;
 
-import fj.*;
-import fj.data.NonEmptyList;
-import fj.data.Option;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -28,7 +29,7 @@ public interface Validated<A> {
      * @param <T>       The returned type
      * @return The result of the corresponding function that has been applied
      */
-    <T> T fold(F<NonEmptyList<String>, T> onFail, F<A, T> onSuccess);
+    <T> T fold(Function<List<String>, T> onFail, Function<A, T> onSuccess);
 
     /**
      * If the Validated is Valid, then this method return a new Validated with the function applied to its contents. If the Validated is
@@ -38,7 +39,7 @@ public interface Validated<A> {
      * @param <B> the type of the value that the function returns
      * @return a new Validated that contains the transformed value, or the original failure.
      */
-    <B> Validated<B> map(F<A, B> f);
+    <B> Validated<B> map(Function<A, B> f);
 
     /**
      * Applies the given function to the value if this is a Valid and returns the result. If this is a Fail, the failure message is
@@ -48,7 +49,7 @@ public interface Validated<A> {
      * @param <B> the type of the value the next validation validates
      * @return either a new validation based on this one, or this.
      */
-    <B> Validated<B> flatMap(F<A, Validated<B>> f);
+    <B> Validated<B> flatMap(Function<A, Validated<B>> f);
 
     /**
      * Applies the function of the supplied validation if both are Valid. Accumulates the failure messages if either or both are
@@ -58,7 +59,7 @@ public interface Validated<A> {
      * @param <B> the type of the return value of the function.
      * @return a new Validated.
      */
-    <B> Validated<B> apply(Validated<F<A, B>> vf);
+    <B> Validated<B> apply(Validated<Function<A, B>> vf);
 
 
     /**
@@ -91,7 +92,9 @@ public interface Validated<A> {
      * @return a Validated that is in the Fail state
      */
     static <A> Validated<A> fail(String msg) {
-        return new Fail<>(NonEmptyList.nel(msg));
+        List<String> list = new ArrayList<>();
+        list.add(msg);
+        return new Fail<>(list);
     }
 
 
@@ -107,17 +110,7 @@ public interface Validated<A> {
         return optional.map(Validated::valid).orElseGet(() -> fail(msg));
     }
 
-    /**
-     * Turns an fj.data.Option into a Validated with the supplied message if the Optional is empty
-     *
-     * @param optional The optional to check
-     * @param msg      the message if the optional is empty
-     * @param <A>      the type of the validated object
-     * @return a new Validated
-     */
-    static <A> Validated<A> of(Option<A> optional, String msg) {
-        return optional.map(Validated::valid).orSome(() -> fail(msg));
-    }
+
 
     /**
      * Validates an object by applying it to the supplied predicate.
@@ -147,39 +140,28 @@ public interface Validated<A> {
      * @param <T> the return type of the pfrovided function
      * @return a new Validated.
      */
-    static <A, B, T> Validated<T> accum(Validated<A> va, Validated<B> vb, F<A, F<B, T>> f) {
+    static <A, B, T> Validated<T> accum(Validated<A> va, Validated<B> vb, Function<A, Function<B, T>> f) {
         return vb.apply(va.map(f));
     }
 
-    static <A, B, T> Validated<T> accumBind(Validated<A> va, Validated<B> vb, F<A, F<B, Validated<T>>> f) {
+    static <A, B, T> Validated<T> accumBind(Validated<A> va, Validated<B> vb, Function<A, Function<B, Validated<T>>> f) {
         return vb.apply(va.map(f)).flatMap(i->i);
     }
 
-    static <A, B, T> Validated<T> accum(Validated<A> va, Validated<B> vb, F2<A, B, T> f) {
-        return accum(va, vb, a -> b -> f.f(a, b));
+    static <A, B, T> Validated<T> accum(Validated<A> va, Validated<B> vb, BiFunction<A, B, T> f) {
+        return accum(va, vb, a -> b -> f.apply(a, b));
     }
 
-    static <A, B, C, T> Validated<T> accum(Validated<A> va, Validated<B> vb, Validated<C> vc, F<A, F<B, F<C, T>>> f) {
+    static <A, B, C, T> Validated<T> accum(Validated<A> va, Validated<B> vb, Validated<C> vc, Function<A, Function<B, Function<C, T>>> f) {
         return vc.apply(vb.apply(va.map(f)));
     }
 
-    static <A, B, C, T> Validated<T> accum(Validated<A> va, Validated<B> vb, Validated<C> vc, F3<A, B, C, T> f) {
-        return accum(va, vb, vc, Function.curry(f));
-    }
-
-    static <A, B, C, D, T> Validated<T> accum(Validated<A> va, Validated<B> vb, Validated<C> vc, Validated<D> vd, F<A, F<B, F<C, F<D, T>>>> f) {
+    static <A, B, C, D, T> Validated<T> accum(Validated<A> va, Validated<B> vb, Validated<C> vc, Validated<D> vd, Function<A, Function<B, Function<C, Function<D, T>>>> f) {
         return vd.apply(vc.apply(vb.apply(va.map(f))));
     }
 
-    static <A, B, C, E, T> Validated<T> accum(Validated<A> va, Validated<B> vb, Validated<C> vc, Validated<E> ve, F4<A, B, C, E, T> f) {
-        return accum(va, vb, vc, ve, Function.curry(f));
-    }
 
-    static <A, B, C, D, E, T> Validated<T> accum(Validated<A> va, Validated<B> vb, Validated<C> vc, Validated<D> vd, Validated<E> ve, F5<A, B, C, D, E, T> f) {
-        return accum(va, vb, vc, vd, ve, Function.curry(f));
-    }
-
-    static <A, B, C, D, E, T> Validated<T> accum(Validated<A> va, Validated<B> vb, Validated<C> vc, Validated<D> vd, Validated<E> ve, F<A, F<B, F<C, F<D, F<E, T>>>>> f) {
+    static <A, B, C, D, E, T> Validated<T> accum(Validated<A> va, Validated<B> vb, Validated<C> vc, Validated<D> vd, Validated<E> ve, Function<A, Function<B, Function<C, Function<D, Function<E, T>>>>> f) {
         return ve.apply(vd.apply(vc.apply(vb.apply(va.map(f)))));
     }
 
@@ -197,27 +179,27 @@ public interface Validated<A> {
             this.value = value;
         }
 
-        public <T> T fold(F<NonEmptyList<String>, T> onFail, F<A, T> onSuccess) {
-            return onSuccess.f(value);
+        public <T> T fold(Function<List<String>, T> onFail, Function<A, T> onSuccess) {
+            return onSuccess.apply(value);
         }
 
         @Override
-        public <B> Validated<B> map(F<A, B> f) {
-            return valid(f.f(value));
+        public <B> Validated<B> map(Function<A, B> f) {
+            return valid(f.apply(value));
         }
 
         @Override
-        public <B> Validated<B> flatMap(F<A, Validated<B>> f) {
-            return f.f(value);
+        public <B> Validated<B> flatMap(Function<A, Validated<B>> f) {
+            return f.apply(value);
         }
 
 
         @Override
-        public <B> Validated<B> apply(Validated<F<A, B>> vf) {
+        public <B> Validated<B> apply(Validated<Function<A, B>> vf) {
             return
               vf.fold(
                 Fail::new,
-                f -> valid(f.f(value))
+                f -> valid(f.apply(value))
               );
         }
 
@@ -236,32 +218,36 @@ public interface Validated<A> {
      */
     class Fail<A> implements Validated<A> {
 
-        final NonEmptyList<String> msgs;
+        final List<String> msgs;
 
-        private Fail(NonEmptyList<String> msgs) {
+        private Fail(List<String> msgs) {
             this.msgs = msgs;
         }
 
 
-        public <T> T fold(F<NonEmptyList<String>, T> onFail, F<A, T> onSuccess) {
-            return onFail.f(msgs);
+        public <T> T fold(Function<List<String>, T> onFail, Function<A, T> onSuccess) {
+            return onFail.apply(msgs);
         }
 
         @Override
-        public <B> Validated<B> map(F<A, B> f) {
+        public <B> Validated<B> map(Function<A, B> f) {
             return new Fail<>(msgs);
         }
 
         @Override
-        public <B> Validated<B> flatMap(F<A, Validated<B>> f) {
+        public <B> Validated<B> flatMap(Function<A, Validated<B>> f) {
             return new Fail<>(msgs);
         }
 
         @Override
-        public <B> Validated<B> apply(Validated<F<A, B>> vf) {
+        public <B> Validated<B> apply(Validated<Function<A, B>> vf) {
             return
               vf.fold(
-                otherMsgs -> new Fail<>(msgs.append(otherMsgs)),
+                otherMsgs -> {
+                    List<String> newList = new ArrayList<>(msgs);
+                    msgs.addAll(otherMsgs);
+                    return new Fail<>(newList);
+                },
                 s -> new Fail<>(msgs)
               );
         }
