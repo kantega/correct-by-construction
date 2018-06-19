@@ -12,10 +12,14 @@ import java.util.function.Predicate;
  * A Validated represents a value that has been validated. It can have one of two states. Either it is a Fail or it is a Valid.
  * The Fail state contains a nonempty list of messages. The Valid state contains the validated value. To use the Validated object
  * one can use several methods to introspect its state.
- * fold() will give access to both states, calling the correct provided function depending on its state (like a visitor).
- * map() will transform the contents of the Validated iff it is Valid.
- * flatMap() lets you validate a value that depends on another Validated
- * apply() is like map(), but "inside" a Validated.
+ * <br/>
+ * <code>fold()</code> will give access to both states, calling the correct provided function depending on its state (like a visitor).
+ * <br/>
+ * <code>map()</code> will transform the contents of the Validated iff it is Valid.
+ * <br/>
+ * <code>flatMap()</code> lets you validate a value that depends on another Validated
+ * <br/>
+ * <code>apply()</code> is like map(), but "inside" a Validated.
  *
  * @param <A> the type of the value that is validated
  */
