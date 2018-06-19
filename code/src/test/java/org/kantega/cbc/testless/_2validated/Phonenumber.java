@@ -20,7 +20,7 @@ public class Phonenumber {
         List<Digit> digitList = Option.somes(Stream.fromString(numberAsString).map(Digit::fromChar)).toList();
 
         return digitList.isEmpty() ?
-          Validated.fail("Feil format på input, det må være minst ett tall") :
+          Validated.invalid("Feil format på input, det må være minst ett tall") :
           Validated.valid(new Phonenumber(NonEmptyList.nel(digitList.head(), digitList.tail())));
     }
 

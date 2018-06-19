@@ -18,14 +18,14 @@ public interface EmailAddress {
         return
           EmailValidator.getInstance().isValid(value) ?
             Validated.valid(new Unconfirmed(value)) :
-            Validated.fail("Feil format");
+            Validated.invalid("Feil format");
     }
 
     static Validated<EmailAddress> validated(Instant instant, String value) {
         return
           EmailValidator.getInstance().isValid(value) ?
             Validated.valid(new Confirmed(instant,value)) :
-            Validated.fail("Feil format");
+            Validated.invalid("Feil format");
     }
 
     class Unconfirmed implements EmailAddress {

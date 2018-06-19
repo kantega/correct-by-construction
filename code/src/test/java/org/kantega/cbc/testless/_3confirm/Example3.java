@@ -21,9 +21,9 @@ public class Example3 {
           maybeInfo
             .map(contactInfo -> contactInfo.email)
             .map(emailAddress -> emailAddress.fold(
-              unconfirmed -> Validated.<DigestMessage>fail("Epostadressen er ikke bekreftet"),
+              unconfirmed -> Validated.<DigestMessage>invalid("Epostadressen er ikke bekreftet"),
               confirmed -> Validated.valid(new DigestMessage(confirmed, digestSubject))))
-            .orElseGet(() -> Validated.fail("Brukeren finnes ikke i databasen"));
+            .orElseGet(() -> Validated.invalid("Brukeren finnes ikke i databasen"));
 
         System.out.println(validatedDigest);
 

@@ -15,7 +15,7 @@ public class EmailAddress {
         return
           EmailValidator.getInstance().isValid(value) ?
             Validated.valid(new EmailAddress(value)) :
-            Validated.fail("Feil format");
+            Validated.invalid("Feil format");
     }
 
     @Override

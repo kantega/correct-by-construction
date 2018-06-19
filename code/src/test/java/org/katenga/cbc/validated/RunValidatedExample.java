@@ -25,7 +25,7 @@ public class RunValidatedExample {
         //Prints out a Valid user
         System.out.println(user2);
 
-        //100%-, sure thing-, guaranteed-, cannot fail-,
+        //100%-, sure thing-, guaranteed-, cannot invalid-,
         //valid user.
         var validUser =
           user2.orElse(new User("unknown",Age.zero));

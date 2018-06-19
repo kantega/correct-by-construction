@@ -6,7 +6,7 @@ import org.kantega.cbyc.Validated;
 
 import java.util.Optional;
 
-import static org.kantega.cbyc.Validated.fail;
+import static org.kantega.cbyc.Validated.invalid;
 import static org.kantega.cbyc.Validated.valid;
 
 public class Settings {
@@ -46,6 +46,6 @@ public class Settings {
         return
           type.isInstance(o)
             ? valid(type.cast(o))
-            : fail("Trying to cast an object of type " + o.getClass().getName() + " to type " + type.getName());
+            : invalid("Trying to cast an object of type " + o.getClass().getName() + " to type " + type.getName());
     }
 }
