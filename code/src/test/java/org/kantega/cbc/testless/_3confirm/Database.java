@@ -17,7 +17,7 @@ public class Database {
                 Optional::of) :
             id.equals("b") ?
               Validated
-                .accum(EmailAddress.confirmed(Instant.now(),"ola.normann@mail.com"), Phonenumber.of("1234567"), ContactInfo::new)
+                .accum(EmailAddress.unsafeCreateConfirmed(Instant.now(),"ola.normann@mail.com"), Phonenumber.of("1234567"), ContactInfo::new)
                 .fold(
                   f -> Optional.empty(),
                   Optional::of) :

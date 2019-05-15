@@ -21,7 +21,7 @@ public interface EmailAddress {
             Validated.invalid("Feil format");
     }
 
-    static Validated<EmailAddress> confirmed(Instant instant, String value) {
+    static Validated<EmailAddress> unsafeCreateConfirmed(Instant instant, String value) {
         return
           EmailValidator.getInstance().isValid(value) ?
             Validated.valid(new Confirmed(instant,value)) :
