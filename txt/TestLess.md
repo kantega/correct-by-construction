@@ -153,23 +153,28 @@ Men dette var enkelt og trivielt. La oss utvide caset vårt litt.
 Epostadressen må jo bekreftes av brukeren. Det øker sannsynligheten for at den stemmer (la oss anta at vi ikke vil eller kan bruke OpenId Connect for pålogging)
 
 Vi endrer EmailAddress til et interface med to implementasjoner: Unconfirmed og Confirmed, og så definerer vi en fold() metode. Denne fungerer akkurat som en visitor, bare at den returnerer en verdi. Vi lar også fold være den _eneste_ måten å hente ut informasjon fra EmailAddress på.
+
+Vi lager to muligheter for å opprette en bekreftet epostadresse på: En for standard forretningslogikk der vi markerer en ubekreftet adresse som bekreftet med hjelp av et "bevis" (i dette tilfellet en timestamp), og en metode vi kan bruke for f.eks. deserialisering. Den sistnevnte gir vi et navn som tydeligjør at den bruker man bare unntaksvis.
+
 ```java
 public interface EmailAddress {
 
+    //Dette er eneste måten å hente ut tilstanden fra EmailAdress på
     <T> T fold(
         Function<Unconfirmed, T> onUnconfirmed,
         Function<Confirmed, T> onConfirmed
     );
 
-
+    //Brukes når vi skal opprett en epostadresse fra brukeren
     static Validated<EmailAddress> of(String value) {
         return
             EmailValidator.getInstance().isValid(value) ?
                 Validated.valid(new Unconfirmed(value)) :
                 Validated.fail("Feil format");
     }
-
-    static Validated<EmailAddress> confirmed(Instant instant, String value) {
+    
+    //Brukes kun til deserialisering der vi stoler på datagrunnlaget
+    static Validated<EmailAddress> unsafeCreateConfirmed(Instant instant, String value) {
         return
             EmailValidator.getInstance().isValid(value) ?
                 Validated.valid(new Confirmed(instant,value)) :
@@ -184,15 +189,17 @@ public interface EmailAddress {
             this.value = value;
         }
 
+        //Brukes når man skal bekrefte en epostadresse. Her bruker vi et tidsstempel som "bevis" på at 
+        //bekreftelsen har skjedd. Denne skal gjøre det vanskelig å opprette bekreftede epostadresser
+        //når man er litt bevisstløs i gjerningsøyeblikket
         public Confirmed confirm(Instant timestamp){
             return new Confirmed(timestamp, value);
         }
-
+       
         @Override
         public <T> T fold(Function<Unconfirmed, T> onUnconfirmed, Function<Confirmed, T> onConfirmed) {
             return onUnconfirmed.apply(this);
         }
-
 
 
     class Confirmed implements EmailAddress {
@@ -212,8 +219,27 @@ public interface EmailAddress {
     }
 }
 ```
-For å hente ut data blir vi nå tvunget til å bruke fold , og da _må_ vi håndtere begge de mulige tilstandene til EmailAddress. Skipper vi det får vi en kompileringsfeil. 
-Så dersom vi f.eks. skal sende ut et ukessammendrag på mail til en bruker, så lager vi oss en sammendrags-klasse som inneholder en EmailAdress.Confirmed. På denne måten kan vi ikke opprette et Sammendragsobjekt uten en bekreftet epostadresse. men vi kan ikke hoppe bukk over caset der adressen ikke er bekreftet.
+
+For å hente ut data blir vi nå tvunget til å bruke `fold()` , og da _må_ vi håndtere begge de mulige tilstandene til EmailAddress. Skipper vi det får vi en kompileringsfeil. 
+
+
+Så dersom vi f.eks. skal sende ut et ukessammendrag på mail til en bruker, så lager vi oss en sammendrags-klasse som inneholder en `EmailAdress.Confirmed`. På denne måten kan vi ikke opprette et sammendragsobjekt uten en bekreftet epostadresse. 
+
+``` 
+public class DigestMessage {
+
+    public final EmailAddress.Confirmed confirmedMail;
+    public final String subject;
+
+    //Kun en bekreftet epostadresse aksepteres her
+    public DigestMessage(EmailAddress.Confirmed confirmedMail, String subject) {
+        this.confirmedMail = confirmedMail;
+        this.subject = subject;
+    }
+}
+```
+For å opprette en `DigestMessage` må nå bruke `EmailAddress.fold()`:
+
 ```java
 public static void main(String[] args) {
 
@@ -238,8 +264,10 @@ public static void main(String[] args) {
 
 }
 ```
+
+
 Oi. Mange vil tenke at dette ser veldig ukjent og rotete ut. Du tenker kanskje at exceptions eller casting, eller sågar bare å sette et flagg i Emailaddress hadde vært mer lettvint. Og svaret er nok utvilsom ja. Men da åpner du opp for at man kan havne i en ugyldig tilstand! Da ville det være mulig  å sende ut mail til en ubekreftet adresse. Dette må du dermed skrive tester for å validere. Og siden de testene må sjekke tilstandsendringen over tid - nemlig at en mail først ikke kan sendes ut, og så sendes ut - blir det adskillig mer arbeid å veldikeholde testene, enn å bare legge på et ekstra lag med typesikkerhet.
-Kanskje er det verdt å øve seg på å lese slik kode allikevel da? Jeg mener - _ingen testing_?
+Kanskje er det verdt å øve seg på å lese slik kode allikevel da? Jeg mener - _mindre testing_?
 
 En bonus med å være så eksplisitt med de ulike tilstandene et objekt kan ha er at man blir tvunget til å tenke gjennom grensetilfellene fra starten: Hva om brukeren ikke finnes (den kan jo bli slettet i mellomtiden). Hva skal systemet gjøre dersom man forsøke sende mail til en ubekreftet adresse? Vær ærlig, dette er problemstillinger vi ofte skyver på til det smeller.
 
