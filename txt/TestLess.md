@@ -167,7 +167,7 @@ public interface EmailAddress {
                 Validated.fail("Feil format");
     }
 
-    static Validated<EmailAddress> validated(Instant instant, String value) {
+    static Validated<EmailAddress> confirmed(Instant instant, String value) {
         return
             EmailValidator.getInstance().isValid(value) ?
                 Validated.valid(new Confirmed(instant,value)) :
