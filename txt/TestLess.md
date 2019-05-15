@@ -6,7 +6,7 @@ Vel, jeg innrømmer at overskriften er noe spekulativ, men les videre så forst�
 
 De aller fleste som jobber med software kan være enige om at testing er lurt. Og jeg tror også at alle kan være enige om at det er nyttig å teste mest mulig med minst mulig kode.
 
-Man kan si at testing er en av mange måter å få tilbakemelding om at programmet ditt gjør det du mener det skal gjøre, og ha den effekten du håper at den skal ha. Man har den enkleste formen for testing med enhetstesting. Den er lynrask og kan gi  tilbakemelding med en gang koden bygges.  Så har man integrasjonstesting, der sammensetning av systemer testes, men automatisk. Litt mer krevende er manuell systemtesting, som krever installasjon og manuelle rutiner. Kanskje har man pilotkunder som får tester nye deler av programmet ditt i et produksjonsmiljl før det slippes løs på et større marked?
+Man kan si at testing er en av mange måter å få tilbakemelding om at programmet ditt gjør det du mener det skal gjøre, og ha den effekten du håper at den skal ha. Man har den enkleste formen for testing med enhetstesting. Den er lynrask og kan gi  tilbakemelding med en gang koden bygges.  Så har man integrasjonstesting, der sammensetning av systemer testes, men automatisk. Litt mer krevende er manuell systemtesting, som krever installasjon og manuelle rutiner. Kanskje har man pilotkunder som får tester nye deler av programmet ditt i et produksjonsmiljø før det slippes løs på et større marked?
 Og til slutt har man har også produksjon, der sluttbrukerne hver dag tester systemet for deg. 
 
 Det trente øyet ser at alle disse testvariantene ligger på et kontinuum, der de enkleste testene gir raskest tilbakemelding og er enklest å lage, mens "testene" i produksjon kan være adskillig mer krevende å reagere på. 
@@ -14,6 +14,8 @@ Det trente øyet ser at alle disse testvariantene ligger på et kontinuum, der d
 Men vi kan gjøre det enda bedre! For det finnes også noe som kan gjøres  _før_ man i det hele tatt _kommer_ til testing!
 
 For den aller raskeste tilbakemeldingen får du av kompilatoren. Den tester om programmet ditt er gyldig! (Vel - syntaktisk gyldig da i hvertfall, og semantisk med tanke på programmeringsspråket, men det er ikke så viktig). Og det er her vi skal begynne: Vi skal se på hvordan vi kan lage programmene våre slik at man _ikke trenger_ teste så mye. Tenk deg det! Slippe å vedlikeholde tester, og _samtidig_ sove godt om natta!
+
+Denne herlige ideen baserer seg på at man bruker subklasser for å beskrive de ulike tilstandene en entitet eller verdi kan ha. Man begrenser mulighetene til å opprette objekter ved å ha private konstruktorer og bruke statiske metoder som sjekker input før objektet returneres. Cluet er at man ikke vet hvilken subklasse man får tilbake, og at man med noen triks sørger for at man må sjekke for alle mulige tilstander - hvis ikke kompilerer ikke koden.
 
 La oss lage oss et lite case som ligner litt på det vi ser fra virkeligheten, men samtidig er så enkelt at det ikke blir for mye arbeid. Vi kan f.eks. tenke oss at vi lager en applikasjon som bl.a. skal håndtere kontaktinformasjon. Vi starter med epost.
 
@@ -167,7 +169,7 @@ public interface EmailAddress {
                 Validated.fail("Feil format");
     }
 
-    static Validated<EmailAddress> validated(Instant instant, String value) {
+    static Validated<EmailAddress> confirmed(Instant instant, String value) {
         return
             EmailValidator.getInstance().isValid(value) ?
                 Validated.valid(new Confirmed(instant,value)) :
