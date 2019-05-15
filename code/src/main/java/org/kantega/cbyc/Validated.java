@@ -119,7 +119,7 @@ public interface Validated<A> {
     /**
      * Validates an object by applying it to the supplied predicate.
      * If the predicate holds, the object is valid.
-     * If the predicate fails, a Invalid is returned with the supplied msg.
+     * If the predicate fails, an Invalid is returned with the supplied msg.
      *
      * @param value     The object to validate
      * @param predicate The predicate that must hold
@@ -149,6 +149,23 @@ public interface Validated<A> {
     }
 
     /**
+     * Accumulates the values of two Validated values. If both are Valid, the values are applied to the provided function, returning
+     * a Valid with the result of the application.
+     * If either Validated is Invalid, the Invalid is returned. If both are Invalid, their messages are append into a new Invalid.
+     *
+     * @param va  A valdiated value a
+     * @param vb  A validated value b
+     * @param f   the function that joins the values
+     * @param <A> the type of a
+     * @param <B> the type of b
+     * @param <T> the return type of the pfrovided function
+     * @return a new Validated.
+     */
+    static <A, B, T> Validated<T> accum(Validated<A> va, Validated<B> vb, BiFunction<A, B, T> f) {
+        return accum(va, vb, a -> b -> f.apply(a, b));
+    }
+
+    /**
      * Validates a value based on two other Validated values. If both are Valid, then the provided function is called. If not, the failed Validated is returned.
      * If both are Invalid, the failures are accumulated.
      * @param va The first Validated
@@ -161,10 +178,6 @@ public interface Validated<A> {
      */
     static <A, B, T> Validated<T> accumBind(Validated<A> va, Validated<B> vb, Function<A, Function<B, Validated<T>>> f) {
         return vb.apply(va.map(f)).flatMap(i->i);
-    }
-
-    static <A, B, T> Validated<T> accum(Validated<A> va, Validated<B> vb, BiFunction<A, B, T> f) {
-        return accum(va, vb, a -> b -> f.apply(a, b));
     }
 
     static <A, B, C, T> Validated<T> accum(Validated<A> va, Validated<B> vb, Validated<C> vc, Function<A, Function<B, Function<C, T>>> f) {

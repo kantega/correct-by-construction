@@ -7,7 +7,6 @@ import java.util.Optional;
 public class Example3 {
 
     public static void main(String[] args) {
-
         final String digestSubject =
           "Dette er en oppsummering";
 
