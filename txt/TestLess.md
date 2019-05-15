@@ -15,7 +15,7 @@ Men vi kan gjøre det enda bedre! For det finnes også noe som kan gjøres  _fø
 
 For den aller raskeste tilbakemeldingen får du av kompilatoren. Den tester om programmet ditt er gyldig! (Vel - syntaktisk gyldig da i hvertfall, og semantisk med tanke på programmeringsspråket, men det er ikke så viktig). Og det er her vi skal begynne: Vi skal se på hvordan vi kan lage programmene våre slik at man _ikke trenger_ teste så mye. Tenk deg det! Slippe å vedlikeholde tester, og _samtidig_ sove godt om natta!
 
-Denne herlige ideen baserer seg på at man bruker subklasser for å beskrive de ulike tilstandene en entitet kan ha. Man begrenser mulighetene til å opprette objekter ved å ha private konstruktorer og bruke statiske metoder som sjekker input før objektet returneres. Cluet er at man ikke vet hvilken subklasse man får tilbake, og at man med noen triks sørger for at man må sjekke for alle mulige tilstander - hvis ikke kompilerer ikke koden.
+Denne herlige ideen baserer seg på at man bruker subklasser for å beskrive de ulike tilstandene en entitet eller verdi kan ha. Man begrenser mulighetene til å opprette objekter ved å ha private konstruktorer og bruke statiske metoder som sjekker input før objektet returneres. Cluet er at man ikke vet hvilken subklasse man får tilbake, og at man med noen triks sørger for at man må sjekke for alle mulige tilstander - hvis ikke kompilerer ikke koden.
 
 La oss lage oss et lite case som ligner litt på det vi ser fra virkeligheten, men samtidig er så enkelt at det ikke blir for mye arbeid. Vi kan f.eks. tenke oss at vi lager en applikasjon som bl.a. skal håndtere kontaktinformasjon. Vi starter med epost.
 
